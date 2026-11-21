@@ -23,7 +23,7 @@ import { attributeReleases, rollup, scoreCommits } from "./metrics.js";
 import { writeNarrative } from "./narrative.js";
 import { compileDenyList, loadDenyList } from "./noise.js";
 import { hasReceipt, rememberReceipt } from "./receipts.js";
-import { buildReport, renderMarkdown, type Report } from "./report.js";
+import { buildReport, GITLAB_OMITTED_NOTE, renderMarkdown, type Report } from "./report.js";
 import { deliverSlack, findExistingDelivery } from "./slack.js";
 import { buildChangeUnits } from "./units.js";
 import { hourBucket, resolveWindow, shouldRunScheduled, type TimeWindow } from "./window.js";
@@ -56,6 +56,7 @@ export interface RunLog {
   delivered: boolean;
   duplicate: boolean;
   counts?: { githubCommits: number; gitlabCommits: number; releases: number; changeUnits: number };
+  notes: string[];
   error?: string;
 }
 
@@ -116,7 +117,11 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
       now,
     });
     if (!gate.run) {
-      return { status: "skipped", reason: gate.reason, log: finish({ status: "skipped", reason: gate.reason, delivered: false, duplicate: false }) };
+      return {
+        status: "skipped",
+        reason: gate.reason,
+        log: finish({ status: "skipped", reason: gate.reason, delivered: false, duplicate: false, notes: [] }),
+      };
     }
   }
 
@@ -148,6 +153,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
           reason: "already delivered for this window",
           delivered: false,
           duplicate: true,
+          notes: [],
           window: windowLog(timeWindow),
           destination,
         }),
@@ -176,6 +182,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
             reason: "already delivered for this window",
             delivered: false,
             duplicate: true,
+            notes: [],
             window: windowLog(timeWindow),
             destination,
           }),
@@ -185,24 +192,31 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
 
     const tokens = requireCollectorSecrets(secrets);
     const apiKey = requireAnthropic(secrets);
-    const [githubCommits, gitlab] = await Promise.all([
-      collectGithub({
-        http,
-        token: tokens.githubToken,
-        org: config.github.org,
-        apiBase: config.github.api_base,
-        since: timeWindow.since,
-        until: timeWindow.until,
-      }),
-      collectGitlab({
-        http,
-        token: tokens.gitlabToken,
-        baseUrl: config.gitlab.base_url,
-        group: config.gitlab.group,
-        since: timeWindow.since,
-        until: timeWindow.until,
-      }),
-    ]);
+    const notes: string[] = [];
+    const githubTask = collectGithub({
+      http,
+      token: tokens.githubToken,
+      org: config.github.org,
+      apiBase: config.github.api_base,
+      since: timeWindow.since,
+      until: timeWindow.until,
+    });
+    const gitlabTask = tokens.gitlabToken
+      ? collectGitlab({
+          http,
+          token: tokens.gitlabToken,
+          baseUrl: config.gitlab.base_url,
+          group: config.gitlab.group,
+          since: timeWindow.since,
+          until: timeWindow.until,
+        })
+      : Promise.resolve(null);
+    const [githubCommits, gitlabResult] = await Promise.all([githubTask, gitlabTask]);
+    if (!gitlabResult) {
+      notes.push(GITLAB_OMITTED_NOTE);
+      process.stderr.write(`${GITLAB_OMITTED_NOTE}\n`);
+    }
+    const gitlab = gitlabResult ?? { commits: [], releases: [] };
     const aliases = loadAliases(resolveFromRoot(root, config.paths.aliases));
     const deny = compileDenyList(loadDenyList(resolveFromRoot(root, config.paths.deny_list)));
     const scored = scoreCommits([...githubCommits, ...gitlab.commits], aliases, deny);
@@ -231,6 +245,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
       projects: activity.projects,
       units: classified,
       llm: cost,
+      notes,
     });
     const narrative = await writeNarrative(draft, client, {
       system: readPrompt(resolveFromRoot(root, config.paths.narrative_prompt)),
@@ -260,6 +275,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
             duplicate: true,
             window: windowLog(timeWindow),
             destination,
+            notes,
             counts: {
               githubCommits: githubCommits.length,
               gitlabCommits: gitlab.commits.length,
@@ -286,6 +302,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
         status: "success",
         delivered,
         duplicate: false,
+        notes,
         window: windowLog(timeWindow),
         destination,
         counts,
@@ -299,6 +316,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
       error: message,
       delivered: false,
       duplicate: false,
+      notes: [],
       window: windowLog(timeWindow),
       destination,
     });

@@ -21,6 +21,7 @@ function report(overrides: Partial<Report> = {}): Report {
     projects: [],
     changeUnits: [],
     llm: { inputTokens: 1, outputTokens: 1, calls: 1, estimatedUsd: 0 },
+    notes: [],
     markdown: "",
     ...overrides,
   };

@@ -54,7 +54,7 @@ Tokens are read from the environment only.
 | GitHub Actions secret | Environment variable | What it needs |
 | --- | --- | --- |
 | `GH_READONLY_TOKEN` | `GH_READONLY_TOKEN` | Read-only access to every repo in the **XDLAB-AI** org. Fine-grained: Contents Read, Metadata Read, Pull requests Read. Classic: `public_repo`, or `repo` if any repo is private. Actions rejects secret names that start with `GITHUB_`, so this is not named `GITHUB_TOKEN`. |
-| `GITLAB_TOKEN` | `GITLAB_TOKEN` | Group access token or PAT for `vgh-code/XdLabsAI-G42`, including subgroups. Scopes `read_api` and `read_repository`. Role Reporter is enough. |
+| `GITLAB_TOKEN` | `GITLAB_TOKEN` | Optional. Group access token or PAT for `vgh-code/XdLabsAI-G42`, including subgroups. Scopes `read_api` and `read_repository`. Role Reporter is enough. If this secret is unset or empty, the run skips GitLab and says so in the digest. |
 | `ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` | Access to `llm.model`. |
 | `SLACK_BOT_TOKEN` | `SLACK_BOT_TOKEN` | Bot token with `chat:write`, `files:write`, `im:write`, `im:history`, and `channels:history`. |
 
@@ -62,7 +62,7 @@ Do not use the automatic Actions `GITHUB_TOKEN` for collection. It can only see 
 
 Auth failures and rate limits abort the run. They are not reported as an empty window.
 
-There is no GitLab connector in this environment yet. Until `GITLAB_TOKEN` is provisioned, a live run cannot see the group. A missing token is an error, not a quiet zero.
+GitLab is optional. An unset or blank `GITLAB_TOKEN` skips that collector, and the digest and run log say GitLab wasn't included because there was no token. A token that is present and then fails authentication still aborts the run.
 
 ## People
 

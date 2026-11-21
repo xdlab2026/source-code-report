@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { repoRoot } from "../src/config.js";
 import type { HttpRequest } from "../src/http.js";
 import { runReport } from "../src/pipeline.js";
+import { formatDigest, GITLAB_OMITTED_NOTE } from "../src/report.js";
 import { json } from "./helpers.js";
 
 const now = new Date("2026-11-21T10:00:00.000Z");
@@ -202,5 +203,65 @@ describe("pipeline", () => {
     expect(second.log.duplicate).toBe(true);
     expect(anthropicCalls).toBe(callsAfter);
     expect(messages).toHaveLength(1);
+    expect(first.log.notes).toEqual([]);
+    expect(messages[0].text).not.toContain(GITLAB_OMITTED_NOTE);
+  });
+
+  it("skips GitLab when the token is unset or blank and notes the digest and run log", async () => {
+    const urls: string[] = [];
+    const outDir = tempDir();
+    const http = {
+      request(input: HttpRequest) {
+        urls.push(input.url);
+        if (input.url.includes("/orgs/XDLAB-AI/repos")) return Promise.resolve(json([]));
+        if (input.url.includes("api.anthropic.com")) return Promise.resolve(anthropic("Nothing shipped."));
+        return Promise.reject(new Error(`unexpected ${input.url}`));
+      },
+    };
+    const shared = {
+      now,
+      stateDir: tempDir(),
+      outDir,
+      http,
+    };
+    const blank = await runReport({
+      ...shared,
+      env: { GH_READONLY_TOKEN: "gh", GITLAB_TOKEN: "  ", ANTHROPIC_API_KEY: "sk" },
+    });
+    expect(blank.status).toBe("success");
+    expect(urls.some((url) => url.includes("gitlab") || url.includes("/api/v4/"))).toBe(false);
+    expect(blank.log.notes).toEqual([GITLAB_OMITTED_NOTE]);
+    expect(blank.report?.markdown).toContain(GITLAB_OMITTED_NOTE);
+    expect(formatDigest(blank.report!)).toContain(GITLAB_OMITTED_NOTE);
+    expect(readFileSync(path.join(outDir, "run.json"), "utf8")).toContain(GITLAB_OMITTED_NOTE);
+
+    urls.length = 0;
+    const unset = await runReport({
+      ...shared,
+      stateDir: tempDir(),
+      outDir: tempDir(),
+      env: { GH_READONLY_TOKEN: "gh", ANTHROPIC_API_KEY: "sk" },
+    });
+    expect(unset.status).toBe("success");
+    expect(unset.log.notes).toEqual([GITLAB_OMITTED_NOTE]);
+    expect(urls.some((url) => url.includes("/api/v4/"))).toBe(false);
+  });
+
+  it("fails the run when a present GitLab token is rejected", async () => {
+    await expect(
+      runReport({
+        now,
+        env: { GH_READONLY_TOKEN: "gh", GITLAB_TOKEN: "gl", ANTHROPIC_API_KEY: "sk" },
+        stateDir: tempDir(),
+        outDir: tempDir(),
+        http: {
+          request(input: HttpRequest) {
+            if (input.url.includes("/orgs/XDLAB-AI/repos")) return Promise.resolve(json([]));
+            if (input.url.includes("/api/v4/groups/")) return Promise.resolve(json({ message: "401 Unauthorized" }, 401));
+            return Promise.reject(new Error(`unexpected ${input.url}`));
+          },
+        },
+      }),
+    ).rejects.toThrow(/GitLab authentication failed \(401\)/);
   });
 });

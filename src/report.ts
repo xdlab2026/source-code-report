@@ -47,8 +47,11 @@ export interface Report {
   projects: ProjectRow[];
   changeUnits: ClassifiedUnit[];
   llm: CostSnapshot;
+  notes: string[];
   markdown: string;
 }
+
+export const GITLAB_OMITTED_NOTE = "GitLab wasn't included because there was no token.";
 
 export function emptyMix(): CategoryMix {
   return {
@@ -79,6 +82,7 @@ export function buildReport(input: {
   projects: ProjectActivity[];
   units: ClassifiedUnit[];
   llm: CostSnapshot;
+  notes?: string[];
 }): Report {
   const people = buildPeople(input.people, input.units);
   const projects = buildProjects(input.projects, input.units);
@@ -98,6 +102,7 @@ export function buildReport(input: {
     projects,
     changeUnits: input.units,
     llm: input.llm,
+    notes: input.notes ?? [],
     markdown: "",
   };
   report.markdown = renderMarkdown(report);
@@ -186,6 +191,7 @@ export function renderMarkdown(report: Report): string {
   lines.push("");
   lines.push(`Window: ${report.sinceLabel} → ${report.untilLabel} (${report.timezone})`);
   lines.push(`Destination: ${report.destination} ${report.destinationId}`);
+  for (const note of report.notes) lines.push(note);
   lines.push("");
   lines.push("## Narrative");
   lines.push("");
@@ -248,6 +254,7 @@ function digestLines(report: Report, people: PersonRow[], projects: ProjectRow[]
   const lines: string[] = [];
   lines.push(`*Engineering activity — ${report.windowPhrase}*`);
   lines.push(`_${report.sinceLabel} → ${report.untilLabel} (${report.timezone})_`);
+  for (const note of report.notes) lines.push(note);
   lines.push("");
   lines.push("*Narrative*");
   lines.push(truncate(report.narrative, 1200));
