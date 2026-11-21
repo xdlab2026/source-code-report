@@ -34,7 +34,7 @@ describe("pipeline", () => {
         outDir: tempDir(),
         http: { request: () => Promise.reject(new Error("should not call the network")) },
       }),
-    ).rejects.toThrow(/GITHUB_TOKEN_READONLY/);
+    ).rejects.toThrow(/GH_READONLY_TOKEN/);
   });
 
   it("skips a weekly cadence on the wrong weekday without calling collectors", async () => {
@@ -58,7 +58,7 @@ describe("pipeline", () => {
       now,
       deliver: true,
       env: {
-        GITHUB_TOKEN_READONLY: "gh",
+        GH_READONLY_TOKEN: "gh",
         GITLAB_TOKEN: "gl",
         ANTHROPIC_API_KEY: "sk",
         SLACK_BOT_TOKEN: "xoxb",
@@ -118,7 +118,7 @@ describe("pipeline", () => {
         if (parsed.pathname.endsWith("/pulls")) return Promise.resolve(json([]));
         if (parsed.pathname.includes("/groups/") && parsed.pathname.endsWith("/projects")) {
           return Promise.resolve(
-            json([{ id: 7, name: "app", path_with_namespace: "vgh-code/XdLabsAI-G42-AppBuilder/app", web_url: "https://gitlab.com/g/app", default_branch: "main" }]),
+            json([{ id: 7, name: "app", path_with_namespace: "vgh-code/XdLabsAI-G42/app", web_url: "https://gitlab.com/g/app", default_branch: "main" }]),
           );
         }
         if (parsed.pathname === "/api/v4/projects/7/repository/branches") {
@@ -174,7 +174,7 @@ describe("pipeline", () => {
       },
     };
     const env = {
-      GITHUB_TOKEN_READONLY: "gh",
+      GH_READONLY_TOKEN: "gh",
       GITLAB_TOKEN: "gl",
       ANTHROPIC_API_KEY: "sk",
       SLACK_BOT_TOKEN: "xoxb",

@@ -80,7 +80,7 @@ export function loadConfig(configPath?: string, root = repoRoot()): AppConfig {
 }
 
 export function readSecrets(env: NodeJS.ProcessEnv): Secrets {
-  const githubToken = env.GITHUB_TOKEN_READONLY || env.REPORT_GITHUB_TOKEN || env.GITHUB_TOKEN;
+  const githubToken = env.GH_READONLY_TOKEN || env.GITHUB_TOKEN;
   return {
     githubToken: blankToUndefined(githubToken),
     gitlabToken: blankToUndefined(env.GITLAB_TOKEN),
@@ -97,7 +97,7 @@ function blankToUndefined(value: string | undefined): string | undefined {
 export function requireCollectorSecrets(secrets: Secrets): { githubToken: string; gitlabToken: string } {
   if (!secrets.githubToken) {
     throw new Error(
-      "Missing GitHub token. Set GITHUB_TOKEN_READONLY (repo secret of the same name). This is not an empty window.",
+      "Missing GitHub token. Set GH_READONLY_TOKEN (repo secret of the same name). This is not an empty window.",
     );
   }
   if (!secrets.gitlabToken) {

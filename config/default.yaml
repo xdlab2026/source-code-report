@@ -32,7 +32,7 @@ github:
 
 gitlab:
   base_url: https://gitlab.com
-  group: vgh-code/XdLabsAI-G42-AppBuilder
+  group: vgh-code/XdLabsAI-G42
 
 paths:
   aliases: people/aliases.yaml

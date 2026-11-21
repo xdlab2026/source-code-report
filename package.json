@@ -2,7 +2,7 @@
   "name": "source-code-report",
   "version": "1.0.0",
   "private": true,
-  "description": "Daily engineering activity digest for the XDLAB-AI GitHub org and the XdLabsAI-G42-AppBuilder GitLab group.",
+  "description": "Daily engineering activity digest for the XDLAB-AI GitHub org and the XdLabsAI-G42 GitLab group.",
   "type": "module",
   "engines": {
     "node": ">=22"

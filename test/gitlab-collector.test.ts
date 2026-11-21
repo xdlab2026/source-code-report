@@ -29,13 +29,13 @@ describe("GitLab collector", () => {
         const page = parsed.searchParams.get("page") ?? "1";
         if (page === "1") {
           return json(
-            [{ id: 1, name: "app", path_with_namespace: "vgh-code/XdLabsAI-G42-AppBuilder/app", web_url: "https://gitlab.com/g/app", default_branch: "main" }],
+            [{ id: 1, name: "app", path_with_namespace: "vgh-code/XdLabsAI-G42/app", web_url: "https://gitlab.com/g/app", default_branch: "main" }],
             200,
             { "x-next-page": "2" },
           );
         }
         return json([
-          { id: 2, name: "nested", path_with_namespace: "vgh-code/XdLabsAI-G42-AppBuilder/nested/app", web_url: "https://gitlab.com/g/nested", default_branch: "main" },
+          { id: 2, name: "nested", path_with_namespace: "vgh-code/XdLabsAI-G42/nested/app", web_url: "https://gitlab.com/g/nested", default_branch: "main" },
         ]);
       }
       if (parsed.pathname.endsWith("/repository/branches")) {
@@ -71,7 +71,7 @@ describe("GitLab collector", () => {
       http,
       token: "gl",
       baseUrl: "https://gitlab.com",
-      group: "vgh-code/XdLabsAI-G42-AppBuilder",
+      group: "vgh-code/XdLabsAI-G42",
       since,
       until: now,
     });
@@ -92,7 +92,7 @@ describe("GitLab collector", () => {
     const http = recorded((url) => {
       const parsed = new URL(url);
       if (parsed.pathname.includes("/groups/")) {
-        return json([{ id: 7, name: "app", path_with_namespace: "vgh-code/XdLabsAI-G42-AppBuilder/app", web_url: "https://gitlab.com/g/app", default_branch: "main" }]);
+        return json([{ id: 7, name: "app", path_with_namespace: "vgh-code/XdLabsAI-G42/app", web_url: "https://gitlab.com/g/app", default_branch: "main" }]);
       }
       if (parsed.pathname.endsWith("/repository/branches")) {
         return json([
@@ -132,7 +132,7 @@ describe("GitLab collector", () => {
       http,
       token: "gl",
       baseUrl: "https://gitlab.com",
-      group: "vgh-code/XdLabsAI-G42-AppBuilder",
+      group: "vgh-code/XdLabsAI-G42",
       since,
       until: now,
     });
@@ -142,7 +142,7 @@ describe("GitLab collector", () => {
     const merged = releases.find((release) => release.version === "9.9.9");
     expect(cut?.authorEmail).toBe("cut@example.com");
     expect(cut?.branch).toBe("release/1.2.3");
-    expect(cut?.projectId).toBe("gitlab:vgh-code/XdLabsAI-G42-AppBuilder/app");
+    expect(cut?.projectId).toBe("gitlab:vgh-code/XdLabsAI-G42/app");
     expect(merged?.gitlabUsername).toBe("sam");
     expect(merged?.timestamp).toBe("2026-11-21T09:30:00Z");
   });
@@ -162,7 +162,7 @@ describe("GitLab collector", () => {
       if (parsed.pathname.endsWith("/merge_requests")) return json([]);
       throw new Error(`unexpected ${url}`);
     });
-    const base = { http, token: "gl", baseUrl: "https://gitlab.com", group: "vgh-code/XdLabsAI-G42-AppBuilder" };
+    const base = { http, token: "gl", baseUrl: "https://gitlab.com", group: "vgh-code/XdLabsAI-G42" };
     await collectGitlab({ ...base, since, until: now });
     await collectGitlab({ ...base, since: new Date(now.getTime() - 7 * day), until: now });
     expect(seen[0]).toBe(since.toISOString());

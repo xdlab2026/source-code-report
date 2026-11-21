@@ -13,7 +13,7 @@ describe("config", () => {
     expect(config.slack.destination).toBe("dm");
     expect(config.slack.user_id).toBe("U0AFYENA7UJ");
     expect(config.github.org).toBe("XDLAB-AI");
-    expect(config.gitlab.group).toBe("vgh-code/XdLabsAI-G42-AppBuilder");
+    expect(config.gitlab.group).toBe("vgh-code/XdLabsAI-G42");
     expect(config.llm.model.length).toBeGreaterThan(0);
     expect(config.llm.max_cost_usd).toBeNull();
   });
@@ -47,7 +47,7 @@ github:
   api_base: https://api.github.com
 gitlab:
   base_url: https://gitlab.com
-  group: vgh-code/XdLabsAI-G42-AppBuilder
+  group: vgh-code/XdLabsAI-G42
 paths:
   aliases: people/aliases.yaml
   deny_list: config/noise-deny.yaml
@@ -74,7 +74,7 @@ paths:
 
   it("reads tokens from the environment and ignores blanks", () => {
     const secrets = readSecrets({
-      GITHUB_TOKEN_READONLY: " gh-read ",
+      GH_READONLY_TOKEN: " gh-read ",
       GITHUB_TOKEN: "should-not-win",
       GITLAB_TOKEN: "",
       ANTHROPIC_API_KEY: "sk-test",

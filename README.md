@@ -1,6 +1,6 @@
 # Engineering activity report
 
-Daily digest of what shipped across the **XDLAB-AI** GitHub org and the **XdLabsAI-G42-AppBuilder** GitLab group. A run collects commits, drops merge and bot commits, maps authors to people, counts raw lines beside meaningful lines, classifies each pull request or merge request (or a lone commit), and posts a short Slack digest plus a CSV.
+Daily digest of what shipped across the **XDLAB-AI** GitHub org and the **XdLabsAI-G42** GitLab group. A run collects commits, drops merge and bot commits, maps authors to people, counts raw lines beside meaningful lines, classifies each pull request or merge request (or a lone commit), and posts a short Slack digest plus a CSV.
 
 v1 is for one reader. The default posts a DM to Slack user `U0AFYENA7UJ`. Leaderboards, dashboards, and email are out of scope.
 
@@ -53,12 +53,12 @@ Tokens are read from the environment only.
 
 | GitHub Actions secret | Environment variable | What it needs |
 | --- | --- | --- |
-| `GITHUB_TOKEN_READONLY` | `GITHUB_TOKEN_READONLY` | Read-only access to every repo in the **XDLAB-AI** org. Fine-grained: Contents Read, Metadata Read, Pull requests Read. Classic: `public_repo`, or `repo` if any repo is private. |
-| `GITLAB_TOKEN` | `GITLAB_TOKEN` | Group access token or PAT for `vgh-code/XdLabsAI-G42-AppBuilder`, including subgroups. Scopes `read_api` and `read_repository`. Role Reporter is enough. |
+| `GH_READONLY_TOKEN` | `GH_READONLY_TOKEN` | Read-only access to every repo in the **XDLAB-AI** org. Fine-grained: Contents Read, Metadata Read, Pull requests Read. Classic: `public_repo`, or `repo` if any repo is private. Actions rejects secret names that start with `GITHUB_`, so this is not named `GITHUB_TOKEN`. |
+| `GITLAB_TOKEN` | `GITLAB_TOKEN` | Group access token or PAT for `vgh-code/XdLabsAI-G42`, including subgroups. Scopes `read_api` and `read_repository`. Role Reporter is enough. |
 | `ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` | Access to `llm.model`. |
 | `SLACK_BOT_TOKEN` | `SLACK_BOT_TOKEN` | Bot token with `chat:write`, `files:write`, `im:write`, `im:history`, and `channels:history`. |
 
-Do not use the automatic Actions `GITHUB_TOKEN` for collection. It can only see this repository. The workflow passes `secrets.GITHUB_TOKEN_READONLY` through as `GITHUB_TOKEN_READONLY`. Locally, `GITHUB_TOKEN` is accepted only if `GITHUB_TOKEN_READONLY` is unset.
+Do not use the automatic Actions `GITHUB_TOKEN` for collection. It can only see this repository, and a secret cannot start with `GITHUB_`. The workflow passes `secrets.GH_READONLY_TOKEN` through as `GH_READONLY_TOKEN`. Locally, `GITHUB_TOKEN` is accepted only if `GH_READONLY_TOKEN` is unset.
 
 Auth failures and rate limits abort the run. They are not reported as an empty window.
 

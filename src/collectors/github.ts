@@ -230,7 +230,7 @@ async function githubJsonWithHeaders(
   if (response.status === 401) {
     throw new CollectorError(
       "auth",
-      "GitHub authentication failed (401). Check the GITHUB_TOKEN_READONLY secret. This is not an empty window.",
+      "GitHub authentication failed (401). Check the GH_READONLY_TOKEN secret. This is not an empty window.",
       401,
     );
   }

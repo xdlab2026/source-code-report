@@ -91,7 +91,7 @@ describe("activity metrics", () => {
     const rolled = rollup(scored, [
       {
         source: "gitlab",
-        projectId: "gitlab:vgh-code/XdLabsAI-G42-AppBuilder/app",
+        projectId: "gitlab:vgh-code/XdLabsAI-G42/app",
         projectName: "app",
         version: "1.2.0",
         branch: "release/1.2.0",

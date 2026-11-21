@@ -43,7 +43,7 @@ jobs:
       - name: Run report
         env:
           WINDOW_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.window || 'config' }}
-          GITHUB_TOKEN_READONLY: ${{ secrets.GITHUB_TOKEN_READONLY }}
+          GH_READONLY_TOKEN: ${{ secrets.GH_READONLY_TOKEN }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
