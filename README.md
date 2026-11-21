@@ -43,7 +43,7 @@ Other keys you will actually touch:
 
 - `report.timezone` is `Europe/Malta`. Windows are durations ending at run time, not calendar days. The timezone is used for the digest clock, the weekly weekday, and the idempotency hour.
 - `report.weekly_weekday` is `Mon`. A scheduled weekly run posts only on that weekday in `report.timezone`.
-- `llm.model` is the Anthropic model id (`claude-sonnet-4-5` by default). Change it when your key needs a dated model id.
+- `llm.model` is the Anthropic API model id (`claude-sonnet-5-5`, Claude Sonnet 5.5).
 - `llm.max_cost_usd` is `null`, so there is no cap. Set a number to abort before Slack if the estimated cost is higher. The prices in config are estimates for the log, not an invoice.
 - Prompts are [`prompts/classify.md`](prompts/classify.md) and [`prompts/narrative.md`](prompts/narrative.md).
 

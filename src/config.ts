@@ -24,8 +24,8 @@ export const configSchema = z.object({
     max_output_tokens: z.number().int().positive().default(800),
     max_retries: z.number().int().min(0).max(3).default(1),
     max_cost_usd: z.number().nonnegative().nullable().default(null),
-    price_input_per_million: z.number().nonnegative().default(3),
-    price_output_per_million: z.number().nonnegative().default(15),
+    price_input_per_million: z.number().nonnegative().default(2),
+    price_output_per_million: z.number().nonnegative().default(10),
   }),
   github: z.object({
     org: z.string().min(1),

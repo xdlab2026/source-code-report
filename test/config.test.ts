@@ -14,7 +14,9 @@ describe("config", () => {
     expect(config.slack.user_id).toBe("U0AFYENA7UJ");
     expect(config.github.org).toBe("XDLAB-AI");
     expect(config.gitlab.group).toBe("vgh-code/XdLabsAI-G42");
-    expect(config.llm.model.length).toBeGreaterThan(0);
+    expect(config.llm.model).toBe("claude-sonnet-5-5");
+    expect(config.llm.price_input_per_million).toBe(2);
+    expect(config.llm.price_output_per_million).toBe(10);
     expect(config.llm.max_cost_usd).toBeNull();
   });
 
