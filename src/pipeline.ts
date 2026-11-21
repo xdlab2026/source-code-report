@@ -23,6 +23,7 @@ import { attributeReleases, rollup, scoreCommits } from "./metrics.js";
 import { writeNarrative } from "./narrative.js";
 import { compileDenyList, loadDenyList } from "./noise.js";
 import { hasReceipt, rememberReceipt } from "./receipts.js";
+import { renderPdf, renderReportHtml } from "./report-pdf.js";
 import { buildReport, GITLAB_OMITTED_NOTE, renderMarkdown, type Report } from "./report.js";
 import { deliverSlack, findExistingDelivery } from "./slack.js";
 import { buildChangeUnits } from "./units.js";
@@ -258,10 +259,11 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
     draft.llm = { ...cost };
     draft.markdown = renderMarkdown(draft);
     const csv = renderCsv(draft);
-    writeArtifacts(outDir, draft, csv);
+    const pdf = await renderPdf(renderReportHtml(draft));
+    writeArtifacts(outDir, draft, csv, pdf);
     let delivered = false;
     if (options.deliver) {
-      const result = await deliverSlack({ http, token: secrets.slackBotToken, report: draft, csv, force: options.force });
+      const result = await deliverSlack({ http, token: secrets.slackBotToken, report: draft, pdf, force: options.force });
       if (result.duplicate && !result.posted) {
         rememberReceipt(stateDir, runKey);
         return {
@@ -352,11 +354,12 @@ function readPrompt(file: string): string {
   return readFileSync(file, "utf8");
 }
 
-function writeArtifacts(dir: string, report: Report, csv: string): void {
+function writeArtifacts(dir: string, report: Report, csv: string, pdf: Buffer): void {
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, "report.md"), report.markdown);
   writeFileSync(path.join(dir, "report.csv"), csv);
   writeFileSync(path.join(dir, "report.json"), `${JSON.stringify(serializeReport(report), null, 2)}\n`);
+  writeFileSync(path.join(dir, "report.pdf"), pdf);
 }
 
 function serializeReport(report: Report): unknown {

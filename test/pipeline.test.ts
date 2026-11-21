@@ -40,7 +40,7 @@ describe("pipeline", () => {
 
   it("skips a weekly cadence on the wrong weekday without calling collectors", async () => {
     const result = await runReport({
-      configPath: configFile((raw) => raw.replace("cadence: daily", "cadence: weekly")),
+      configPath: configFile((raw) => raw.replace(/cadence: \w+/, "cadence: weekly")),
       scheduled: true,
       now: new Date("2026-11-17T10:00:00.000Z"),
       env: {},
@@ -182,7 +182,7 @@ describe("pipeline", () => {
     };
     const first = await runReport({ now, deliver: true, env, http, stateDir, outDir });
     expect(first.status).toBe("success");
-    expect(first.report?.windowPhrase).toBe("past 24 hours");
+    expect(first.report?.windowPhrase).toBe("last week");
     expect(first.report?.people.map((person) => person.personId)).toEqual(["xiaodong-zhou"]);
     const person = first.report!.people[0];
     expect(person.unmapped).toBe(false);
@@ -194,7 +194,7 @@ describe("pipeline", () => {
     expect(first.log.delivered).toBe(true);
     expect(first.log.durationMs).toBeGreaterThanOrEqual(0);
     expect(messages).toHaveLength(1);
-    expect(messages[0].text.indexOf("*Narrative*")).toBeLessThan(messages[0].text.indexOf("*People*"));
+    expect(messages[0].text).toContain("The PDF has the overview");
     expect(readFileSync(path.join(outDir, "report.csv"), "utf8")).toContain("change_unit");
 
     const callsAfter = anthropicCalls;

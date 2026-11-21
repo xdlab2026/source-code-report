@@ -1,8 +1,8 @@
 # v1 defaults. Change this file to switch window, cadence, or Slack destination.
 # No collector or report code changes are required.
 report:
-  window: 24h # 24h | 7d
-  cadence: daily # daily | weekly
+  window: 7d # 24h | 7d
+  cadence: weekly # daily | weekly
   timezone: Europe/Malta
   # When cadence is weekly, a scheduled tick runs only on this weekday in timezone.
   weekly_weekday: Mon

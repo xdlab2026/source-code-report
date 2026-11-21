@@ -244,54 +244,20 @@ export function renderMarkdown(report: Report): string {
   return lines.join("\n");
 }
 
-export function formatDigest(report: Report, maxChars = 3500): string {
-  const full = digestLines(report, report.people, report.projects);
-  if (full.length <= maxChars) return full;
-  return digestLines(report, report.people.slice(0, 15), report.projects.slice(0, 15), true);
-}
-
-function digestLines(report: Report, people: PersonRow[], projects: ProjectRow[], truncated = false): string {
-  const lines: string[] = [];
-  lines.push(`*Engineering activity — ${report.windowPhrase}*`);
-  lines.push(`_${report.sinceLabel} → ${report.untilLabel} (${report.timezone})_`);
-  for (const note of report.notes) lines.push(note);
-  lines.push("");
-  lines.push("*Narrative*");
-  lines.push(truncate(report.narrative, 1200));
-  lines.push("");
-  lines.push("*People*");
-  if (people.length === 0) lines.push("_No activity in this window._");
-  for (const person of people) {
-    const unmapped = person.unmapped ? " _(unmapped)_" : "";
-    const releases =
-      person.releases.length > 0 ? ` · releases ${person.releases.map((release) => release.version).join(", ")}` : "";
-    lines.push(
-      `• *${person.displayName}*${unmapped} — ${person.commits} commits · ${person.meaningfulLines} meaningful lines (${person.rawLines} raw) · ${person.projects.join(", ") || "—"} · ${formatMix(person.categoryMix)} · high complexity ${person.highComplexity}${releases}`,
-    );
-  }
-  if (truncated && report.people.length > people.length) {
-    lines.push(`_…and ${report.people.length - people.length} more people in the CSV._`);
-  }
-  lines.push("");
-  lines.push("*Projects*");
-  if (projects.length === 0) lines.push("_No project activity in this window._");
-  for (const project of projects) {
-    const releases =
-      project.source === "gitlab" && project.releases.length > 0
-        ? ` · releases ${project.releases.map((release) => release.version).join(", ")}`
-        : "";
-    const risks =
-      project.risks.length > 0 ? ` · risks: ${project.risks.map((risk) => risk.flags.join(", ")).join("; ")}` : "";
-    lines.push(
-      `• *${project.projectName}* (${project.source}) — ${project.contributors.length} people · ${project.commits} commits · ${project.meaningfulLines} meaningful lines (${project.rawLines} raw) · ${formatMix(project.categoryMix)}${releases}${risks}`,
-    );
-  }
-  if (truncated && report.projects.length > projects.length) {
-    lines.push(`_…and ${report.projects.length - projects.length} more projects in the CSV._`);
-  }
-  lines.push("");
-  lines.push(`_LLM calls ${report.llm.calls}, estimated cost $${report.llm.estimatedUsd.toFixed(4)}_`);
-  lines.push(`report-key:${report.runKey}`);
+export function formatDigest(report: Report): string {
+  const commits = report.people.reduce((sum, person) => sum + person.commits, 0);
+  const projects = report.projects.length;
+  const lines = [
+    `*Engineering activity — ${report.windowPhrase}*`,
+    `_${report.sinceLabel} → ${report.untilLabel} (${report.timezone})_`,
+    ...report.notes,
+    "",
+    truncate(report.narrative, 700) || "_No narrative._",
+    "",
+    `${commits} commits across ${projects} project${projects === 1 ? "" : "s"}. The PDF has the overview, every project, and every person.`,
+    `_LLM calls ${report.llm.calls}, estimated cost $${report.llm.estimatedUsd.toFixed(4)}_`,
+    `report-key:${report.runKey}`,
+  ];
   return lines.join("\n");
 }
 

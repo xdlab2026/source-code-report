@@ -231,13 +231,14 @@ describe("report builder", () => {
       units: [],
       llm: { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
     });
-    expect(week.windowPhrase).toBe("last 7 days");
-    expect(week.markdown).toContain("last 7 days");
+    expect(week.windowPhrase).toBe("last week");
+    expect(week.markdown).toContain("last week");
     expect(week.people).toEqual([]);
 
     const digest = formatDigest(report);
-    expect(digest.indexOf("*Narrative*")).toBeLessThan(digest.indexOf("*People*"));
-    expect(digest.indexOf("*People*")).toBeLessThan(digest.indexOf("*Projects*"));
+    expect(digest).toContain("past 24 hours");
+    expect(digest).toContain("The PDF has the overview");
+    expect(digest).not.toContain("*People*");
     expect(digest).toContain("report-key:");
 
     const csv = renderCsv(report);

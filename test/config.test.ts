@@ -7,8 +7,8 @@ import { loadConfig, readSecrets, repoRoot } from "../src/config.js";
 describe("config", () => {
   it("loads the checked-in defaults", () => {
     const config = loadConfig(path.join(repoRoot(), "config", "default.yaml"));
-    expect(config.report.window).toBe("24h");
-    expect(config.report.cadence).toBe("daily");
+    expect(config.report.window).toBe("7d");
+    expect(config.report.cadence).toBe("weekly");
     expect(config.report.timezone).toBe("Europe/Malta");
     expect(config.slack.destination).toBe("dm");
     expect(config.slack.user_id).toBe("U0AFYENA7UJ");

@@ -30,7 +30,7 @@ export async function deliverSlack(input: {
   http: HttpClient;
   token: string | undefined;
   report: Report;
-  csv: string;
+  pdf: Uint8Array;
   force?: boolean;
 }): Promise<DeliveryResult> {
   if (!input.token) {
@@ -50,7 +50,7 @@ export async function deliverSlack(input: {
   await slack(input.http, input.token, "chat.postMessage", {
     json: { channel: existing.channelId, text, unfurl_links: false, unfurl_media: false },
   });
-  await uploadCsv(input.http, input.token, existing.channelId, input.csv, input.report);
+  await uploadPdf(input.http, input.token, existing.channelId, input.pdf, input.report);
   return { posted: true, duplicate: false, channelId: existing.channelId };
 }
 
@@ -74,29 +74,28 @@ async function resolveChannel(
   return channel;
 }
 
-async function uploadCsv(http: HttpClient, token: string, channelId: string, csv: string, report: Report): Promise<void> {
-  const filename = `engineering-activity-${report.until.slice(0, 10)}.csv`;
-  const length = Buffer.byteLength(csv);
+async function uploadPdf(http: HttpClient, token: string, channelId: string, pdf: Uint8Array, report: Report): Promise<void> {
+  const filename = `engineering-activity-${report.until.slice(0, 10)}.pdf`;
   const slot = await slack(http, token, "files.getUploadURLExternal", {
-    form: { filename, length: String(length) },
+    form: { filename, length: String(pdf.byteLength) },
   });
   const uploadUrl = str(asRecord(slot)?.upload_url);
   const fileId = str(asRecord(slot)?.file_id);
-  if (!uploadUrl || !fileId) throw new DeliveryError("Slack did not return a file upload URL. The CSV was not attached.");
+  if (!uploadUrl || !fileId) throw new DeliveryError("Slack did not return a file upload URL. The PDF was not attached.");
   const uploaded = await http.request({
     url: uploadUrl,
     method: "POST",
-    headers: { "content-type": "text/csv" },
-    body: csv,
+    headers: { "content-type": "application/pdf" },
+    bytes: pdf,
   });
   if (uploaded.status >= 300) {
-    throw new DeliveryError(`Slack file upload failed (${uploaded.status}). The digest may be missing its CSV.`);
+    throw new DeliveryError(`Slack file upload failed (${uploaded.status}). The digest may be missing its PDF.`);
   }
   await slack(http, token, "files.completeUploadExternal", {
     json: {
       files: [{ id: fileId, title: "Engineering activity" }],
       channel_id: channelId,
-      initial_comment: "CSV for this digest (change units, people, and projects).",
+      initial_comment: "PDF for this digest.",
     },
   });
 }

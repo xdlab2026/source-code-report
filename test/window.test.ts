@@ -8,13 +8,13 @@ import { hourBucket, resolveWindow, shouldRunScheduled, weekdayInTimeZone } from
 describe("window and cadence", () => {
   const now = new Date("2026-11-21T10:00:00Z");
 
-  it("uses the past 24 hours or the last 7 days ending at run time", () => {
+  it("uses the past 24 hours or last week ending at run time", () => {
     const day = resolveWindow({ preset: "24h", now });
     const week = resolveWindow({ preset: "24h", now, override: "7d" });
     expect(day.until.getTime() - day.since.getTime()).toBe(24 * 60 * 60 * 1000);
     expect(day.phrase).toBe("past 24 hours");
     expect(week.until.getTime() - week.since.getTime()).toBe(7 * 24 * 60 * 60 * 1000);
-    expect(week.phrase).toBe("last 7 days");
+    expect(week.phrase).toBe("last week");
   });
 
   it("accepts an explicit since and until", () => {

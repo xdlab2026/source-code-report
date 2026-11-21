@@ -14,7 +14,7 @@ const DURATION_MS: Record<WindowPreset, number> = {
 
 export function windowPhrase(preset: WindowPreset | "custom"): string {
   if (preset === "24h") return "past 24 hours";
-  if (preset === "7d") return "last 7 days";
+  if (preset === "7d") return "last week";
   return "the selected window";
 }
 

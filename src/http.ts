@@ -3,6 +3,7 @@ export interface HttpRequest {
   method?: string;
   headers?: Record<string, string>;
   body?: string;
+  bytes?: Uint8Array;
 }
 
 export interface HttpResponse {
@@ -21,7 +22,7 @@ export function createFetchClient(timeoutMs = 30_000): HttpClient {
       const response = await fetch(input.url, {
         method: input.method ?? "GET",
         headers: input.headers,
-        body: input.body,
+        body: input.bytes ? Buffer.from(input.bytes) : input.body,
         signal: AbortSignal.timeout(timeoutMs),
       });
       const headers: Record<string, string> = {};

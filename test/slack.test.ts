@@ -27,8 +27,10 @@ function report(overrides: Partial<Report> = {}): Report {
   };
 }
 
+const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+
 describe("Slack delivery", () => {
-  it("DMs Xiaodong and attaches the CSV", async () => {
+  it("DMs Xiaodong and attaches the PDF, not the CSV", async () => {
     const calls: string[] = [];
     const http = recorded((url, init) => {
       calls.push(new URL(url).pathname + (init.method ?? "GET"));
@@ -39,16 +41,23 @@ describe("Slack delivery", () => {
       if (url.includes("conversations.history")) return json({ ok: true, messages: [] });
       if (url.includes("chat.postMessage")) {
         const text = JSON.parse(init.body ?? "{}").text as string;
-        expect(text.indexOf("*Narrative*")).toBeLessThan(text.indexOf("*People*"));
+        expect(text).toContain("past 24 hours");
+        expect(text).toContain("The PDF has the overview");
+        expect(text).not.toContain("*People*");
         expect(JSON.parse(init.body ?? "{}").channel).toBe("D777");
         return json({ ok: true });
       }
-      if (url.includes("files.getUploadURLExternal")) return json({ ok: true, upload_url: "https://files.slack.com/upload/v1/abc", file_id: "F1" });
+      if (url.includes("files.getUploadURLExternal")) {
+        const params = new URLSearchParams(init.body as string);
+        expect(params.get("filename")).toMatch(/\.pdf$/);
+        expect(params.get("filename")).not.toMatch(/\.csv$/);
+        return json({ ok: true, upload_url: "https://files.slack.com/upload/v1/abc", file_id: "F1" });
+      }
       if (url.includes("files.slack.com")) return json("ok", 200);
       if (url.includes("files.completeUploadExternal")) return json({ ok: true });
       throw new Error(`unexpected ${url}`);
     });
-    const result = await deliverSlack({ http, token: "xoxb-test", report: report(), csv: "section,window\n" });
+    const result = await deliverSlack({ http, token: "xoxb-test", report: report(), pdf });
     expect(result.posted).toBe(true);
     expect(calls.some((call) => call.includes("conversations.open"))).toBe(true);
   });
@@ -73,7 +82,7 @@ describe("Slack delivery", () => {
       http,
       token: "xoxb-test",
       report: report({ destination: "channel", destinationId: "C999", runKey: "24h|bucket|channel|C999" }),
-      csv: "section\n",
+      pdf,
     });
     expect(result.posted).toBe(true);
     expect(result.channelId).toBe("C999");
@@ -88,13 +97,13 @@ describe("Slack delivery", () => {
       if (url.includes("chat.postMessage")) throw new Error("double post");
       throw new Error(`unexpected ${url}`);
     });
-    const result = await deliverSlack({ http, token: "xoxb-test", report: report(), csv: "x" });
+    const result = await deliverSlack({ http, token: "xoxb-test", report: report(), pdf });
     expect(result).toMatchObject({ posted: false, duplicate: true });
   });
 
   it("fails closed when the token is missing or Slack rejects the channel", async () => {
     const http = recorded(() => json({ ok: true }));
-    await expect(deliverSlack({ http, token: undefined, report: report(), csv: "x" })).rejects.toBeInstanceOf(DeliveryError);
+    await expect(deliverSlack({ http, token: undefined, report: report(), pdf })).rejects.toBeInstanceOf(DeliveryError);
     const bad = recorded((url) => {
       if (url.includes("conversations.history") || url.includes("conversations.open")) {
         return json({ ok: false, error: "channel_not_found" });
@@ -106,7 +115,7 @@ describe("Slack delivery", () => {
         http: bad,
         token: "xoxb-test",
         report: report({ destination: "channel", destinationId: "C_MISSING" }),
-        csv: "x",
+        pdf,
       }),
     ).rejects.toThrow(/channel_not_found/);
   });

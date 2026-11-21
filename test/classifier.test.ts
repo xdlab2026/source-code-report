@@ -114,10 +114,12 @@ describe("classifier", () => {
     expect(failed.classification).toBeNull();
   });
 
-  it("asks the narrative prompt not to rank people", () => {
+  it("asks the narrative to name standout work without a leaderboard", () => {
     const prompt = readFileSync(path.join(repoRoot(), "prompts", "narrative.md"), "utf8").toLowerCase();
-    expect(prompt).toContain("do not rank");
+    expect(prompt).toContain("leaderboard");
+    expect(prompt).toContain("standout");
     expect(prompt).toContain("past 24 hours");
-    expect(prompt).toContain("last 7 days");
+    expect(prompt).toContain("last week");
+    expect(prompt).not.toContain("do not rank");
   });
 });

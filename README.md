@@ -1,8 +1,8 @@
 # Engineering activity report
 
-Daily digest of what shipped across the **XDLAB-AI** GitHub org and the **XdLabsAI-G42** GitLab group. A run collects commits, drops merge and bot commits, maps authors to people, counts raw lines beside meaningful lines, classifies each pull request or merge request (or a lone commit), and posts a short Slack digest plus a CSV.
+Weekly digest of what shipped across the **XDLAB-AI** GitHub org and the **XdLabsAI-G42** GitLab group. A run collects commits, drops merge and bot commits, maps authors to people, counts raw lines beside meaningful lines, classifies each pull request or merge request (or a lone commit), and posts a short Slack summary with a PDF.
 
-v1 is for one reader. The default posts a DM to Slack user `U0AFYENA7UJ`. Leaderboards, dashboards, and email are out of scope.
+v1 is for one reader. The default posts a DM to Slack user `U0AFYENA7UJ`. The PDF names standout projects and people in the overview. It does not include a leaderboard. Dashboards and email are out of scope.
 
 ## Setup
 
@@ -31,13 +31,13 @@ Defaults live in [`config/default.yaml`](config/default.yaml). These keys are th
 
 | Key | Default | Also allowed |
 | --- | --- | --- |
-| `report.window` | `24h` | `7d` |
-| `report.cadence` | `daily` | `weekly` |
+| `report.window` | `7d` (last week) | `24h` (past 24 hours) |
+| `report.cadence` | `weekly` | `daily` |
 | `slack.destination` | `dm` | `channel` |
 | `slack.user_id` | `U0AFYENA7UJ` | any Slack user id |
 | `slack.channel_id` | empty | required when destination is `channel` |
 
-Switching the window to `7d`, the cadence to `weekly`, or the destination to a channel is a config edit. Collectors, the classifier, and the report builder do not need code changes.
+The checked-in defaults are a weekly run covering the last week. Switching the window to `24h`, the cadence to `daily`, or the destination to a channel is a config edit. Collectors, the classifier, and the report builder do not need code changes.
 
 Other keys you will actually touch:
 
@@ -110,7 +110,7 @@ Each unit is sent to the Anthropic Messages API using `llm.model`. The response 
 
 Invalid JSON is retried (`llm.max_retries`, default 1) and then marked failed. It is not stored as a guess. Oversized diffs are trimmed to `llm.max_input_chars` and still classified. Token use and an estimated USD cost are written on the run log and at the bottom of the digest.
 
-The narrative is a short factual paragraph: what shipped, where effort went, and anything worth a look. It does not rank people.
+The narrative is a short factual paragraph: what shipped, where effort went, and anything worth a look. It may name standout projects and the people who did that work. It does not publish a leaderboard.
 
 ### Eval
 
@@ -120,7 +120,7 @@ That score is not a live Anthropic measurement. A live pass still needs a key. R
 
 ## Run once
 
-Dry-run is the default. It writes `out/report.md`, `out/report.csv`, `out/report.json`, and `out/run.json`. It does not post to Slack.
+Dry-run is the default. It writes `out/report.md`, `out/report.pdf`, `out/report.csv`, `out/report.json`, and `out/run.json`. It does not post to Slack.
 
 ```bash
 npm run report
@@ -130,11 +130,19 @@ npm run report -- --deliver
 npm run report -- --window 24h --deliver
 ```
 
-`--window` is `24h` or `7d` and ends at the current time. `--since` and `--until` together are an explicit range (both required). `--deliver` posts. `--force` posts even if this window was already delivered. `--config path` loads another YAML file.
+`--window` is `24h` or `7d` and ends at the current time. `7d` is described as last week. `24h` is the past 24 hours. `--since` and `--until` together are an explicit range (both required). `--deliver` posts. `--force` posts even if this window was already delivered. `--config path` loads another YAML file.
 
-A manual run ignores `report.cadence`, so you can produce a 7-day digest on a Tuesday without waiting for Monday. `--scheduled` is what the daily job passes so the cadence gate applies.
+A manual run ignores `report.cadence`, so you can produce last week's digest on a Tuesday without waiting for Monday. `--scheduled` is what the weekly job passes so the cadence gate applies.
 
-The CSV is one file with a `section` column:
+The PDF is the report. It has three sections:
+
+1. **Overview** — the window, a short narrative, key numbers, and the projects and people who stood out.
+2. **Projects** — every project that changed, the main changes, who contributed, and each person's share of that project's lines.
+3. **People** — every person, with their effort split across projects as a share and as commits, meaningful lines, and raw lines.
+
+Activities are pull requests, merge requests, and bare commits, with category and summary. The PDF does not list raw per-change line statistics. Aggregates stay on each project and person. Risk flags and the GitLab-skipped note appear when they apply. People are ordered by name. People with no commits, releases, or classified work are omitted.
+
+The CSV stays in `out/` and in the Actions artifact. Slack does not attach it. Columns are unchanged:
 
 - `change_unit` — one PR, MR, or commit, with raw and meaningful line counts and the AI labels
 - `person` — projects, commits, raw and meaningful lines, category mix, high-complexity count, releases
@@ -142,20 +150,19 @@ The CSV is one file with a `section` column:
 
 There is no email path.
 
-The Slack message is meant for a phone: the narrative, then one line per person, then one line per project. People are ordered by name, not by volume. People with no commits, releases, or classified work are omitted. The footer `report-key:…` is how a retry notices that this window was already posted.
+The Slack message is a short summary: the window, the narrative, one line of counts, and a pointer to the PDF. The footer `report-key:…` is how a retry notices that this window was already posted.
 
-## Daily job
+## Weekly job
 
-The job is a GitHub Actions workflow in this repo: [`.github/workflows/daily-report.yml`](.github/workflows/daily-report.yml).
+The job is a GitHub Actions workflow in this repo: [`.github/workflows/daily-report.yml`](.github/workflows/daily-report.yml). The file name is unchanged. The Actions title is **Weekly engineering report**.
 
-- Cron `0 6 * * *` UTC. That is **07:00 Europe/Malta in winter (CET)** and **08:00 in summer (CEST)**. Actions cron does not follow daylight saving time, so summer runs an hour later. Change the cron only if you want a different tick; you do not need to change it to go weekly.
-- The workflow ticks every day. `report.cadence` decides whether that tick posts. `daily` posts every tick. `weekly` posts only on `report.weekly_weekday` (Monday by default) in Europe/Malta.
-- `report.window` decides whether the tick covers 24 hours or 7 days. Set both to `weekly` and `7d` in config when you want the weekly digest. No collector or report code changes.
-- **Run workflow** in the Actions tab, and pick `24h` or `7d`, for a one-off override. `config` uses the file and the cadence gate.
+- Cron `0 6 * * 1` UTC, Monday. That is **07:00 Europe/Malta in winter (CET)** and **08:00 in summer (CEST)**. Both times are still Monday in Europe/Malta. Actions cron does not follow daylight saving time, so summer runs an hour later.
+- `report.cadence` is `weekly`, so a scheduled tick posts only on `report.weekly_weekday` (Monday) in Europe/Malta. `report.window` is `7d`.
+- **Run workflow** in the Actions tab. The default window is `7d`. `24h` is still an option. A manual run does not wait for Monday.
 - A concurrency group stops two hosted runs from overlapping. A second run for the same window sees the Slack `report-key` (last 100 messages) or `state/delivered.json` and does not post again. The workflow restores `state/` from the Actions cache as a backup. On a fresh runner the Slack history is the source of truth, which is why `im:history` and `channels:history` are required.
-- If a post succeeds and the CSV upload then fails, a retry will see the key and skip. Re-send with `--force` if you need the file.
+- If a post succeeds and the PDF upload then fails, a retry will see the key and skip. Re-send with `--force` if you need the file.
 - A lock file under `state/` blocks a second local process for the same key. Locks older than six hours are treated as stale.
-- Each run logs status, duration, and LLM token cost to stdout and to `out/run.json`. The workflow uploads `out/` as an artifact.
+- Each run logs status, duration, and LLM token cost to stdout and to `out/run.json`. The workflow uploads `out/` as an artifact, including `report.pdf` and `report.csv`.
 
 ### Hosting and cost
 
@@ -174,7 +181,8 @@ LLM budget: still open. `llm.max_cost_usd` is unset, so a run will not stop itse
 | Noise filter | `test/noise.test.ts` |
 | SHA dedupe, cherry-picks, rollups | `test/metrics.test.ts` |
 | Classifier schema, retry, trim | `test/classifier.test.ts` |
-| Report, digest order, CSV | `test/report.test.ts` |
+| Report, digest, CSV | `test/report.test.ts` |
+| PDF sections and effort shares | `test/report-pdf.test.ts` |
 | Slack DM, channel, duplicate, failures | `test/slack.test.ts` |
 | Window, Malta weekday, overlap lock | `test/window.test.ts` |
 | Full pipeline on mocks | `test/pipeline.test.ts` |
