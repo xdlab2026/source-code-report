@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xdlab2026/source-code-report/schema/classification.json",
+  "title": "ChangeClassification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["category", "size", "complexity", "risk_flags", "summary"],
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "feature",
+        "bugfix",
+        "refactor",
+        "test",
+        "docs",
+        "config/infra",
+        "dependency",
+        "release"
+      ]
+    },
+    "size": {
+      "type": "string",
+      "enum": ["S", "M", "L", "XL"],
+      "description": "Based on meaningful lines and files touched, not lockfiles or generated code."
+    },
+    "complexity": {
+      "type": "string",
+      "enum": ["low", "med", "high"],
+      "description": "Reasoning difficulty. Independent of size. A small change may be high."
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["auth/data touched", "no tests", "large untested change"]
+      },
+      "uniqueItems": true
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "description": "One line. No newline."
+    }
+  }
+}

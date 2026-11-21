@@ -1,0 +1,716 @@
+[
+  {
+    "id": "gh-01",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Add CSV download for invoices",
+    "description": "Users can download an invoice as CSV.",
+    "diff": "diff -- src/change.ts\n+Add CSV download for invoices\n",
+    "meaningfulLines": 40,
+    "gold": {
+      "category": "feature",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Adds a CSV download for invoices."
+    },
+    "model_output": {
+      "category": "feature",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Adds a CSV download for invoices."
+    }
+  },
+  {
+    "id": "gh-02",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Add a project filter to the activity page",
+    "description": "Filter the list by project name.",
+    "diff": "diff -- src/change.ts\n+Add a project filter to the activity page\n",
+    "meaningfulLines": 140,
+    "gold": {
+      "category": "feature",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Adds a project filter on the activity page."
+    },
+    "model_output": {
+      "category": "feature",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Adds a project filter on the activity page."
+    }
+  },
+  {
+    "id": "gh-03",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Store session tokens in the auth service",
+    "description": "Moves token persistence behind the auth boundary.",
+    "diff": "diff -- src/change.ts\n+Store session tokens in the auth service\n",
+    "meaningfulLines": 480,
+    "gold": {
+      "category": "feature",
+      "size": "L",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched"
+      ],
+      "summary": "Stores session tokens inside the auth service."
+    },
+    "model_output": {
+      "category": "feature",
+      "size": "L",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched"
+      ],
+      "summary": "Stores session tokens inside the auth service."
+    }
+  },
+  {
+    "id": "gh-04",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Fix a null deref in the permission check",
+    "description": "A missing user crashed the check. The patch is small.",
+    "diff": "diff -- src/change.ts\n+Fix a null deref in the permission check\n",
+    "meaningfulLines": 18,
+    "gold": {
+      "category": "bugfix",
+      "size": "S",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched"
+      ],
+      "summary": "Fixes a crash when the permission subject is missing."
+    },
+    "model_output": {
+      "category": "bugfix",
+      "size": "S",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched"
+      ],
+      "summary": "Fixes a crash when the permission subject is missing."
+    }
+  },
+  {
+    "id": "gh-05",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Correct the off-by-one in page size",
+    "description": "The last row was dropped.",
+    "diff": "diff -- src/change.ts\n+Correct the off-by-one in page size\n",
+    "meaningfulLines": 90,
+    "gold": {
+      "category": "bugfix",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Includes the last row in a paged result."
+    },
+    "model_output": {
+      "category": "bugfix",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Includes the last row in a paged result."
+    }
+  },
+  {
+    "id": "gh-06",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Split the billing client into modules",
+    "description": "No behavior change. Files were moved.",
+    "diff": "diff -- src/change.ts\n+Split the billing client into modules\n",
+    "meaningfulLines": 160,
+    "gold": {
+      "category": "refactor",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Splits the billing client without changing behavior."
+    },
+    "model_output": {
+      "category": "refactor",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Splits the billing client without changing behavior."
+    }
+  },
+  {
+    "id": "gh-07",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Rewrite the query planner",
+    "description": "Same results, new plan structure, harder to follow.",
+    "diff": "diff -- src/change.ts\n+Rewrite the query planner\n",
+    "meaningfulLines": 520,
+    "gold": {
+      "category": "refactor",
+      "size": "L",
+      "complexity": "high",
+      "risk_flags": [],
+      "summary": "Rewrites the query planner while keeping results stable."
+    },
+    "model_output": {
+      "category": "refactor",
+      "size": "L",
+      "complexity": "high",
+      "risk_flags": [],
+      "summary": "Rewrites the query planner while keeping results stable."
+    }
+  },
+  {
+    "id": "gh-08",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Cover the invoice formatter",
+    "description": "Unit tests only.",
+    "diff": "diff -- src/change.ts\n+Cover the invoice formatter\n",
+    "meaningfulLines": 30,
+    "gold": {
+      "category": "test",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Adds unit tests for the invoice formatter."
+    },
+    "model_output": {
+      "category": "test",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Adds unit tests for the invoice formatter."
+    }
+  },
+  {
+    "id": "gh-09",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Add integration tests for checkout",
+    "description": "Exercises the checkout path.",
+    "diff": "diff -- src/change.ts\n+Add integration tests for checkout\n",
+    "meaningfulLines": 180,
+    "gold": {
+      "category": "test",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Adds checkout integration tests."
+    },
+    "model_output": {
+      "category": "test",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Adds checkout integration tests."
+    }
+  },
+  {
+    "id": "gh-10",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Document the local run command",
+    "description": "README only.",
+    "diff": "diff -- src/change.ts\n+Document the local run command\n",
+    "meaningfulLines": 20,
+    "gold": {
+      "category": "docs",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Documents how to run the report locally."
+    },
+    "model_output": {
+      "category": "docs",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Documents how to run the report locally."
+    }
+  },
+  {
+    "id": "gh-11",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Rewrite the API overview",
+    "description": "Docs only, longer page.",
+    "diff": "diff -- src/change.ts\n+Rewrite the API overview\n",
+    "meaningfulLines": 110,
+    "gold": {
+      "category": "docs",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Rewrites the API overview."
+    },
+    "model_output": {
+      "category": "docs",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Rewrites the API overview."
+    }
+  },
+  {
+    "id": "gh-12",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Add the daily GitHub Action",
+    "description": "Scheduled workflow and secret names.",
+    "diff": "diff -- src/change.ts\n+Add the daily GitHub Action\n",
+    "meaningfulLines": 130,
+    "gold": {
+      "category": "config/infra",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Adds the daily scheduled workflow."
+    },
+    "model_output": {
+      "category": "config/infra",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Adds the daily scheduled workflow."
+    }
+  },
+  {
+    "id": "gh-13",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Pin the Node version",
+    "description": "Engines field and CI image.",
+    "diff": "diff -- src/change.ts\n+Pin the Node version\n",
+    "meaningfulLines": 12,
+    "gold": {
+      "category": "config/infra",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Pins Node 22 for local runs and CI."
+    },
+    "model_output": {
+      "category": "config/infra",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Pins Node 22 for local runs and CI."
+    }
+  },
+  {
+    "id": "gh-14",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Bump typescript to 5.8",
+    "description": "Dependency bump, lockfile ignored.",
+    "diff": "diff -- src/change.ts\n+Bump typescript to 5.8\n",
+    "meaningfulLines": 8,
+    "gold": {
+      "category": "dependency",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Bumps TypeScript to 5.8."
+    },
+    "model_output": {
+      "category": "dependency",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Bumps TypeScript to 5.8."
+    }
+  },
+  {
+    "id": "gh-15",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Upgrade the Slack SDK",
+    "description": "Dependency bump across a few call sites.",
+    "diff": "diff -- src/change.ts\n+Upgrade the Slack SDK\n",
+    "meaningfulLines": 70,
+    "gold": {
+      "category": "dependency",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Upgrades the Slack SDK."
+    },
+    "model_output": {
+      "category": "dependency",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Upgrades the Slack SDK."
+    }
+  },
+  {
+    "id": "gh-16",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Cut release 1.2.0",
+    "description": "Version bump and changelog for the release branch.",
+    "diff": "diff -- src/change.ts\n+Cut release 1.2.0\n",
+    "meaningfulLines": 15,
+    "gold": {
+      "category": "release",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Cuts release 1.2.0."
+    },
+    "model_output": {
+      "category": "release",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Cuts release 1.2.0."
+    }
+  },
+  {
+    "id": "gh-17",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Replace the sync engine",
+    "description": "Large untested rewrite of sync, including token storage.",
+    "diff": "diff -- src/change.ts\n+Replace the sync engine\n",
+    "meaningfulLines": 2400,
+    "gold": {
+      "category": "feature",
+      "size": "XL",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched",
+        "no tests",
+        "large untested change"
+      ],
+      "summary": "Replaces the sync engine, including token storage, without tests."
+    },
+    "model_output": {
+      "category": "feature",
+      "size": "XL",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched",
+        "no tests",
+        "large untested change"
+      ],
+      "summary": "Replaces the sync engine, including token storage, without tests."
+    }
+  },
+  {
+    "id": "gh-18",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Handle conflicting edits in the editor",
+    "description": "Small diff, but the merge rules are subtle.",
+    "diff": "diff -- src/change.ts\n+Handle conflicting edits in the editor\n",
+    "meaningfulLines": 80,
+    "gold": {
+      "category": "feature",
+      "size": "M",
+      "complexity": "high",
+      "risk_flags": [],
+      "summary": "Handles conflicting edits in the editor."
+    },
+    "model_output": {
+      "category": "feature",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Handles conflicting edits in the editor."
+    }
+  },
+  {
+    "id": "gh-19",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Stop dropping events on reconnect",
+    "description": "Reconnect path lost events. No new tests.",
+    "diff": "diff -- src/change.ts\n+Stop dropping events on reconnect\n",
+    "meaningfulLines": 360,
+    "gold": {
+      "category": "bugfix",
+      "size": "L",
+      "complexity": "med",
+      "risk_flags": [
+        "no tests"
+      ],
+      "summary": "Stops dropping events when the client reconnects."
+    },
+    "model_output": {
+      "category": "bugfix",
+      "size": "L",
+      "complexity": "med",
+      "risk_flags": [
+        "no tests"
+      ],
+      "summary": "Stops dropping events when the client reconnects."
+    }
+  },
+  {
+    "id": "gh-20",
+    "source": "github",
+    "kind": "pull_request",
+    "title": "Move handlers into a package",
+    "description": "Mechanical move of a large package.",
+    "diff": "diff -- src/change.ts\n+Move handlers into a package\n",
+    "meaningfulLines": 1800,
+    "gold": {
+      "category": "refactor",
+      "size": "XL",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Moves request handlers into their own package."
+    },
+    "model_output": {
+      "category": "refactor",
+      "size": "XL",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Moves request handlers into their own package."
+    }
+  },
+  {
+    "id": "gl-01",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Show the release branch in the sidebar",
+    "description": "UI only.",
+    "diff": "diff -- src/change.ts\n+Show the release branch in the sidebar\n",
+    "meaningfulLines": 45,
+    "gold": {
+      "category": "feature",
+      "size": "S",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Shows the release branch in the sidebar."
+    },
+    "model_output": {
+      "category": "feature",
+      "size": "S",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Shows the release branch in the sidebar."
+    }
+  },
+  {
+    "id": "gl-02",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Stop leaking customer ids in logs",
+    "description": "Log lines included customer identifiers.",
+    "diff": "diff -- src/change.ts\n+Stop leaking customer ids in logs\n",
+    "meaningfulLines": 60,
+    "gold": {
+      "category": "bugfix",
+      "size": "M",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched"
+      ],
+      "summary": "Stops writing customer ids into logs."
+    },
+    "model_output": {
+      "category": "bugfix",
+      "size": "M",
+      "complexity": "high",
+      "risk_flags": [
+        "auth/data touched"
+      ],
+      "summary": "Stops writing customer ids into logs."
+    }
+  },
+  {
+    "id": "gl-03",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Rename the legacy client",
+    "description": "Rename only.",
+    "diff": "diff -- src/change.ts\n+Rename the legacy client\n",
+    "meaningfulLines": 25,
+    "gold": {
+      "category": "refactor",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Renames the legacy client."
+    },
+    "model_output": {
+      "category": "refactor",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Renames the legacy client."
+    }
+  },
+  {
+    "id": "gl-04",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Record fixtures for the import job",
+    "description": "Test fixtures and a runner.",
+    "diff": "diff -- src/change.ts\n+Record fixtures for the import job\n",
+    "meaningfulLines": 420,
+    "gold": {
+      "category": "test",
+      "size": "L",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Records fixtures for the import job."
+    },
+    "model_output": {
+      "category": "test",
+      "size": "L",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Records fixtures for the import job."
+    }
+  },
+  {
+    "id": "gl-05",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Add a runbook for tokens",
+    "description": "Docs for provisioning read-only tokens.",
+    "diff": "diff -- src/change.ts\n+Add a runbook for tokens\n",
+    "meaningfulLines": 35,
+    "gold": {
+      "category": "docs",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Adds a token provisioning runbook."
+    },
+    "model_output": {
+      "category": "docs",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Adds a token provisioning runbook."
+    }
+  },
+  {
+    "id": "gl-06",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Move production to the new cluster",
+    "description": "Infra cutover with a careful rollout.",
+    "diff": "diff -- src/change.ts\n+Move production to the new cluster\n",
+    "meaningfulLines": 300,
+    "gold": {
+      "category": "config/infra",
+      "size": "L",
+      "complexity": "high",
+      "risk_flags": [],
+      "summary": "Moves production onto the new cluster."
+    },
+    "model_output": {
+      "category": "config/infra",
+      "size": "L",
+      "complexity": "high",
+      "risk_flags": [],
+      "summary": "Moves production onto the new cluster."
+    }
+  },
+  {
+    "id": "gl-07",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Bump the base image digest",
+    "description": "Image pin only.",
+    "diff": "diff -- src/change.ts\n+Bump the base image digest\n",
+    "meaningfulLines": 6,
+    "gold": {
+      "category": "dependency",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Bumps the base image digest."
+    },
+    "model_output": {
+      "category": "dependency",
+      "size": "S",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Bumps the base image digest."
+    }
+  },
+  {
+    "id": "gl-08",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Merge release/1.1.0",
+    "description": "Production release branch merged.",
+    "diff": "diff -- src/change.ts\n+Merge release/1.1.0\n",
+    "meaningfulLines": 50,
+    "gold": {
+      "category": "release",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Merges release 1.1.0."
+    },
+    "model_output": {
+      "category": "release",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Merges release 1.1.0."
+    }
+  },
+  {
+    "id": "gl-09",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Fix the empty state on search",
+    "description": "Search showed a blank page when there were no hits.",
+    "diff": "diff -- src/change.ts\n+Fix the empty state on search\n",
+    "meaningfulLines": 22,
+    "gold": {
+      "category": "bugfix",
+      "size": "S",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Fixes the empty state on search."
+    },
+    "model_output": {
+      "category": "refactor",
+      "size": "S",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Fixes the empty state on search."
+    }
+  },
+  {
+    "id": "gl-10",
+    "source": "gitlab",
+    "kind": "merge_request",
+    "title": "Explain the backup window",
+    "description": "Docs that describe when backups run.",
+    "diff": "diff -- src/change.ts\n+Explain the backup window\n",
+    "meaningfulLines": 90,
+    "gold": {
+      "category": "docs",
+      "size": "M",
+      "complexity": "med",
+      "risk_flags": [],
+      "summary": "Explains the backup window."
+    },
+    "model_output": {
+      "category": "config/infra",
+      "size": "M",
+      "complexity": "low",
+      "risk_flags": [],
+      "summary": "Explains the backup window."
+    }
+  }
+]

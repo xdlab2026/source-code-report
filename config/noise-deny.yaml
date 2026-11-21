@@ -1,0 +1,112 @@
+# Files matching any pattern are excluded from meaningful lines.
+# They still count toward raw lines.
+#
+# Globs: * matches inside one path segment, ** matches across segments.
+# Matching is case-insensitive. To extend the list, add a rule. No code change.
+#
+# kinds: lockfile | generated | vendored
+rules:
+  - id: package-lock
+    kind: lockfile
+    pattern: "**/package-lock.json"
+  - id: npm-shrinkwrap
+    kind: lockfile
+    pattern: "**/npm-shrinkwrap.json"
+  - id: yarn-lock
+    kind: lockfile
+    pattern: "**/yarn.lock"
+  - id: pnpm-lock
+    kind: lockfile
+    pattern: "**/pnpm-lock.yaml"
+  - id: bun-lock
+    kind: lockfile
+    pattern: "**/bun.lock"
+  - id: bun-lockb
+    kind: lockfile
+    pattern: "**/bun.lockb"
+  - id: cargo-lock
+    kind: lockfile
+    pattern: "**/Cargo.lock"
+  - id: gemfile-lock
+    kind: lockfile
+    pattern: "**/Gemfile.lock"
+  - id: poetry-lock
+    kind: lockfile
+    pattern: "**/poetry.lock"
+  - id: pipfile-lock
+    kind: lockfile
+    pattern: "**/Pipfile.lock"
+  - id: uv-lock
+    kind: lockfile
+    pattern: "**/uv.lock"
+  - id: composer-lock
+    kind: lockfile
+    pattern: "**/composer.lock"
+  - id: go-sum
+    kind: lockfile
+    pattern: "**/go.sum"
+  - id: packages-lock
+    kind: lockfile
+    pattern: "**/packages.lock.json"
+  - id: gradle-lockfile
+    kind: lockfile
+    pattern: "**/*.lockfile"
+  - id: podfile-lock
+    kind: lockfile
+    pattern: "**/Podfile.lock"
+  - id: package-resolved
+    kind: lockfile
+    pattern: "**/Package.resolved"
+
+  - id: min-js
+    kind: generated
+    pattern: "**/*.min.js"
+  - id: min-css
+    kind: generated
+    pattern: "**/*.min.css"
+  - id: js-map
+    kind: generated
+    pattern: "**/*.js.map"
+  - id: css-map
+    kind: generated
+    pattern: "**/*.css.map"
+  - id: generated-dir
+    kind: generated
+    pattern: "**/generated/**"
+  - id: dunder-generated
+    kind: generated
+    pattern: "**/__generated__/**"
+  - id: generated-suffix
+    kind: generated
+    pattern: "**/*.generated.*"
+  - id: generated-infix
+    kind: generated
+    pattern: "**/*_generated.*"
+  - id: protobuf-go
+    kind: generated
+    pattern: "**/*.pb.go"
+  - id: protobuf-ts
+    kind: generated
+    pattern: "**/*.pb.ts"
+  - id: dist-dir
+    kind: generated
+    pattern: "**/dist/**"
+  - id: build-dir
+    kind: generated
+    pattern: "**/build/**"
+
+  - id: vendor-dir
+    kind: vendored
+    pattern: "**/vendor/**"
+  - id: third-party
+    kind: vendored
+    pattern: "**/third_party/**"
+  - id: third-party-hyphen
+    kind: vendored
+    pattern: "**/third-party/**"
+  - id: node-modules
+    kind: vendored
+    pattern: "**/node_modules/**"
+  - id: yarn-cache
+    kind: vendored
+    pattern: "**/.yarn/**"

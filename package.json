@@ -1,0 +1,27 @@
+{
+  "name": "source-code-report",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily engineering activity digest for the XDLAB-AI GitHub org and the XdLabsAI-G42-AppBuilder GitLab group.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval": "tsx src/cli.ts eval",
+    "check": "tsc --noEmit && vitest run && tsx src/cli.ts eval",
+    "report": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.8.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
+  }
+}

@@ -1,0 +1,64 @@
+name: Daily engineering report
+
+on:
+  schedule:
+    # 06:00 UTC. That is 07:00 in Europe/Malta during CET (winter, UTC+1)
+    # and 08:00 during CEST (summer, UTC+2). GitHub cron cannot follow DST.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      window:
+        description: "Use config, or override the window for this run."
+        required: false
+        default: config
+        type: choice
+        options:
+          - config
+          - 24h
+          - 7d
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engineering-activity-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: state
+          key: report-delivery-state-${{ github.run_id }}
+          restore-keys: |
+            report-delivery-state-
+      - name: Run report
+        env:
+          WINDOW_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.window || 'config' }}
+          GITHUB_TOKEN_READONLY: ${{ secrets.GITHUB_TOKEN_READONLY }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: |
+          set -euo pipefail
+          args=(--deliver)
+          if [ "$WINDOW_OVERRIDE" = "24h" ] || [ "$WINDOW_OVERRIDE" = "7d" ]; then
+            args+=(--window "$WINDOW_OVERRIDE")
+          else
+            args+=(--scheduled)
+          fi
+          npm run report -- "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engineering-activity-report
+          path: out/
+          if-no-files-found: ignore

@@ -1,0 +1,43 @@
+# v1 defaults. Change this file to switch window, cadence, or Slack destination.
+# No collector or report code changes are required.
+report:
+  window: 24h # 24h | 7d
+  cadence: daily # daily | weekly
+  timezone: Europe/Malta
+  # When cadence is weekly, a scheduled tick runs only on this weekday in timezone.
+  weekly_weekday: Mon
+
+slack:
+  destination: dm # dm | channel
+  user_id: U0AFYENA7UJ
+  # Used only when destination is channel.
+  channel_id: ""
+
+llm:
+  # Anthropic model id. Change this when you want a different model.
+  model: claude-sonnet-4-5
+  max_input_chars: 12000
+  max_output_tokens: 800
+  # Invalid JSON is retried this many times, then the change unit is marked failed.
+  max_retries: 1
+  # Estimated USD cap for one run. null means no cap (budget still open).
+  # Prices below are estimates used only for the log; they are not a bill.
+  max_cost_usd: null
+  price_input_per_million: 3
+  price_output_per_million: 15
+
+github:
+  org: XDLAB-AI
+  api_base: https://api.github.com
+
+gitlab:
+  base_url: https://gitlab.com
+  group: vgh-code/XdLabsAI-G42-AppBuilder
+
+paths:
+  aliases: people/aliases.yaml
+  deny_list: config/noise-deny.yaml
+  classify_prompt: prompts/classify.md
+  narrative_prompt: prompts/narrative.md
+  state_dir: state
+  out_dir: out
