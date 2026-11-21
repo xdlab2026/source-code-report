@@ -81,9 +81,28 @@ describe("activity metrics", () => {
     const rolled = rollup(scored, []);
     expect(rolled.people).toHaveLength(1);
     expect(rolled.people[0].unmapped).toBe(true);
-    expect(rolled.people[0].personId).toBe("unmapped:github:stranger");
+    expect(rolled.people[0].personId).toBe("unmapped:email:stranger@example.com");
     expect(rolled.people[0].commits).toBe(1);
-    expect(rolled.projects[0].contributors[0].personId).toBe("unmapped:github:stranger");
+    expect(rolled.projects[0].contributors[0].personId).toBe("unmapped:email:stranger@example.com");
+  });
+
+  it("leaves an uncredited tool out of the people rollup", () => {
+    const scored = scoreCommits(
+      [
+        commit({
+          sha: "bot",
+          authorName: "AppBuilder Bot",
+          authorEmail: "bot@xdlab.ai",
+          githubLogin: null,
+          message: "feat\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+        }),
+      ],
+      people,
+      deny,
+    );
+    expect(scored[0].toolOnly).toBe(true);
+    expect(rollup(scored, []).people).toEqual([]);
+    expect(rollup(scored, []).projects).toEqual([]);
   });
 
   it("attributes a GitLab release and does not double-count lines", () => {

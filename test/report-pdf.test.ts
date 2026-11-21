@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ClassifiedUnit } from "../src/classifier.js";
+import { emptyIdentityMapping } from "../src/identity.js";
 import { emptyMix, GITLAB_OMITTED_NOTE, type Report } from "../src/report.js";
 import { personEffort, projectContributors, renderPdf, renderReportHtml } from "../src/report-pdf.js";
 
@@ -10,6 +11,8 @@ function unit(partial: Partial<ClassifiedUnit> & Pick<ClassifiedUnit, "id" | "ti
     url: "https://github.com/XDLAB-AI/api/pull/1",
     source: "github",
     unmapped: false,
+    toolOnly: false,
+    authors: [],
     commits: ["abc"],
     files: [],
     rawLines: partial.meaningfulLines,
@@ -46,6 +49,7 @@ function report(): Report {
     narrative: "The api project took the auth work.",
     runKey: "7d|2026-11-21T06|dm|U0AFYENA7UJ",
     notes: [GITLAB_OMITTED_NOTE],
+    identityMapping: emptyIdentityMapping(),
     markdown: "",
     llm: { calls: 2, inputTokens: 10, outputTokens: 4, estimatedUsd: 0.01 },
     people: [
@@ -134,6 +138,8 @@ describe("PDF report", () => {
     expect(html).toContain("1. Overview");
     expect(html).toContain("2. Projects");
     expect(html).toContain("3. People");
+    expect(html).toContain("4. Identity mapping");
+    expect(html).toContain("No new identities.");
     expect(html).toContain("last week");
     expect(html).toContain(GITLAB_OMITTED_NOTE);
     expect(html).toContain("Standout projects");
@@ -144,6 +150,41 @@ describe("PDF report", () => {
     expect(html).toContain("INTELLIGENCE ENGINEERED");
     expect(html).not.toContain("change_unit");
     expect(html.toLowerCase()).not.toContain("leaderboard");
+  });
+
+  it("shows an applied alias and a paste-ready snippet for an uncredited tool", () => {
+    const built = report();
+    built.identityMapping = {
+      applied: [
+        {
+          personId: "xiaodong-zhou",
+          displayName: "Xiaodong Zhou",
+          rows: [{ seen: "Watson X <watsonx@localhost>", via: "email alias", commits: 2 }],
+        },
+      ],
+      unmapped: [
+        {
+          personId: "unmapped:tool:noreply@anthropic.com",
+          displayName: "Claude",
+          emails: ["noreply@anthropic.com"],
+          githubLogins: ["claude"],
+          gitlabUsernames: [],
+          projects: ["people-wiki"],
+          commits: 2,
+          tool: true,
+          snippet: "  - id: claude\n    display_name: Claude\n    emails:\n      - noreply@anthropic.com\n    github_logins:\n      - claude\n    gitlab_usernames: []",
+        },
+      ],
+    };
+    const html = renderReportHtml(built);
+    expect(html).toContain("Aliases applied");
+    expect(html).toContain("Watson X &lt;watsonx@localhost&gt;");
+    expect(html).toContain("Xiaodong Zhou");
+    expect(html).toContain("email alias");
+    expect(html).toContain("New identities");
+    expect(html).toContain("Not credited to a person.");
+    expect(html).toContain("noreply@anthropic.com");
+    expect(html).toContain("people-wiki");
   });
 
   it("prints a PDF with Chrome", async () => {

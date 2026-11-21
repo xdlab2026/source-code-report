@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DeliveryError } from "../src/errors.js";
+import { emptyIdentityMapping } from "../src/identity.js";
 import type { Report } from "../src/report.js";
 import { deliverSlack } from "../src/slack.js";
 import { json, recorded } from "./helpers.js";
@@ -22,6 +23,7 @@ function report(overrides: Partial<Report> = {}): Report {
     changeUnits: [],
     llm: { inputTokens: 1, outputTokens: 1, calls: 1, estimatedUsd: 0 },
     notes: [],
+    identityMapping: emptyIdentityMapping(),
     markdown: "",
     ...overrides,
   };

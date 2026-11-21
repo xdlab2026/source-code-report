@@ -24,6 +24,8 @@ function classified(partial: Partial<ClassifiedUnit> & Pick<ClassifiedUnit, "id"
     projectId: "github:XDLAB-AI/api",
     projectName: "api",
     unmapped: false,
+    toolOnly: false,
+    authors: [],
     commits: ["abc"],
     files: [],
     meaningfulLines: 10,
@@ -70,7 +72,7 @@ describe("report builder", () => {
       people,
       deny,
     );
-    const units = buildChangeUnits(scored, people, deny);
+    const units = buildChangeUnits(scored, deny);
     expect(units).toHaveLength(2);
     const pull = units.find((unit) => unit.type === "pull_request");
     expect(pull?.title).toBe("Add export");
@@ -122,7 +124,7 @@ describe("report builder", () => {
     ];
     const activityPeople = [
       {
-        personId: "unmapped:github:amy",
+        personId: "unmapped:email:amy@example.com",
         displayName: "Amy Zee",
         unmapped: true,
         projects: ["github:XDLAB-AI/web"],
@@ -136,7 +138,7 @@ describe("report builder", () => {
         releases: [],
       },
       {
-        personId: "unmapped:github:zara",
+        personId: "unmapped:email:zara@example.com",
         displayName: "Zara Zee",
         unmapped: true,
         projects: ["github:XDLAB-AI/api"],
@@ -155,7 +157,7 @@ describe("report builder", () => {
         projectId: "github:XDLAB-AI/api",
         projectName: "api",
         source: "github" as const,
-        contributors: [{ personId: "unmapped:github:zara", displayName: "Zara Zee" }],
+        contributors: [{ personId: "unmapped:email:zara@example.com", displayName: "Zara Zee" }],
         commits: 50,
         rawAdditions: 40,
         rawDeletions: 0,
@@ -170,7 +172,7 @@ describe("report builder", () => {
         projectId: "github:XDLAB-AI/web",
         projectName: "web",
         source: "github" as const,
-        contributors: [{ personId: "unmapped:github:amy", displayName: "Amy Zee" }],
+        contributors: [{ personId: "unmapped:email:amy@example.com", displayName: "Amy Zee" }],
         commits: 1,
         rawAdditions: 1,
         rawDeletions: 0,
@@ -185,7 +187,7 @@ describe("report builder", () => {
         projectId: "gitlab:group/app",
         projectName: "app",
         source: "gitlab" as const,
-        contributors: [{ personId: "unmapped:github:zara", displayName: "Zara Zee" }],
+        contributors: [{ personId: "unmapped:email:zara@example.com", displayName: "Zara Zee" }],
         commits: 0,
         rawAdditions: 0,
         rawDeletions: 0,
@@ -194,7 +196,7 @@ describe("report builder", () => {
         rawLines: 0,
         meaningfulLines: 0,
         releaseCount: 1,
-        releases: [{ version: "1.2.0", personId: "unmapped:github:zara", displayName: "Zara Zee" }],
+        releases: [{ version: "1.2.0", personId: "unmapped:email:zara@example.com", displayName: "Zara Zee" }],
       },
     ];
     const report = buildReport({

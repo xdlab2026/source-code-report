@@ -184,6 +184,8 @@ describe("pipeline", () => {
     expect(first.status).toBe("success");
     expect(first.report?.windowPhrase).toBe("last week");
     expect(first.report?.people.map((person) => person.personId)).toEqual(["xiaodong-zhou"]);
+    expect(first.log.identityMapping).toContain("Xiaodong Zhou");
+    expect(first.log.identityMapping).toContain("No new identities.");
     const person = first.report!.people[0];
     expect(person.unmapped).toBe(false);
     expect(person.meaningfulLines).toBeLessThan(person.rawLines);

@@ -66,13 +66,19 @@ GitLab is optional. An unset or blank `GITLAB_TOKEN` skips that collector, and t
 
 ## People
 
-[`people/aliases.yaml`](people/aliases.yaml) maps emails, GitHub logins, and GitLab usernames onto one id and display name. Matching is case-insensitive. GitHub login wins, then GitLab username, then email.
+[`people/aliases.yaml`](people/aliases.yaml) maps emails, GitHub logins, and GitLab usernames onto one id and display name. Matching is exact and case-insensitive. Email is checked first, then GitHub login, then GitLab username. A similar name is not merged on its own.
 
-Add a person by appending an entry. Put every login they commit under on the same id, or the digest will split them.
+Add a person by appending an entry. The PDF **Identity mapping** section and the Actions log print each new identity as a ready-to-paste snippet. Copy that snippet under `people:`, then set `id` and `display_name` to the real person. Put every email and login they use on the same id, or the report will split them.
 
-An author who matches nothing is kept as `unmapped:<kind>:<key>` and marked unmapped. They are not dropped.
+The same section lists every alias that matched in the window, grouped by person, with the raw name, email, or login and the commit count. Tool authors (Claude, Cursor, Copilot, AppBuilder Bot) are credited to the first human `Co-authored-by` trailer, or else to the pull request or merge request author. If neither is a human, the commits stay in that section and are not added to a person. AppBuilder Bot is left unmapped on purpose.
 
-The checked-in file maps **Xiaodong Zhou** to GitHub login `xdlab2026` and the GitHub noreply address `262348385+xdlab2026@users.noreply.github.com`. His GitLab username is not filled in: it was not verified while this repo was created. Add it under `gitlab_usernames` when you know it, and add any other commit emails you see. GitLab commit objects usually have an email and not a username, so the email is what joins a GitLab commit to a person. Merge request authors and release mergers join on GitLab username.
+The checked-in file maps:
+
+- **Xiaodong Zhou** — logins `xdlab2026` and `xiaodong-zhou`, the GitHub noreply address, `xiaodong@xdlab.ai`, `xiaodong.zhou@presight.ai`, and the Watson X machine emails `watsonx@localhost` and `watsonx@Watsons-Mac-Studio-3.local`. His GitLab username is still empty.
+- **taolu** — `treklife@126.com`, `tao.l@xdlab.ai`, and GitHub login `taolu-ai`. The display name stays taolu.
+- **Sharon** — `sharon@Sharons-MacBook-Pro.local` and GitLab username `Sharon-L`.
+
+GitLab commit objects usually have an email and not a username, so the email is what joins a GitLab commit to a person. Merge request authors and release mergers join on GitLab username.
 
 ## Noise filter
 

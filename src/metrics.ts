@@ -1,5 +1,5 @@
 import { isBotIdentity, isMergeCommit, unionBranches } from "./collectors/shared.js";
-import { resolveIdentity, type Person } from "./identity.js";
+import { creditAuthor, resolveIdentity, type CreditVia, type MatchKind, type Person } from "./identity.js";
 import type { CollectedCommit, ReleaseRecord } from "./model.js";
 import { scoreFiles, type DenyMatch, type LineScore } from "./noise.js";
 
@@ -7,6 +7,17 @@ export interface ScoredCommit extends CollectedCommit, LineScore {
   personId: string;
   displayName: string;
   unmapped: boolean;
+  toolOnly: boolean;
+  via: CreditVia;
+  matchedBy: MatchKind | null;
+  rawName: string;
+  rawEmail: string;
+  rawLogin: string;
+  rawGitlab: string;
+  creditedName: string;
+  creditedEmail: string;
+  creditedLogin: string;
+  creditedGitlab: string;
 }
 
 export interface AttributedRelease extends ReleaseRecord {
@@ -103,13 +114,16 @@ export function scoreCommits(
   );
   return kept.map((commit) => {
     const lines = scoreFiles(commit.files, deny);
-    const identity = resolveIdentity(people, {
-      email: commit.authorEmail,
+    const credit = creditAuthor(people, {
+      authorName: commit.authorName,
+      authorEmail: commit.authorEmail,
       githubLogin: commit.githubLogin,
       gitlabUsername: commit.gitlabUsername,
-      name: commit.authorName,
+      message: commit.message,
+      pullRequest: commit.pullRequest,
+      mergeRequest: commit.mergeRequest,
     });
-    return { ...commit, ...lines, ...identity };
+    return { ...commit, ...lines, ...credit };
   });
 }
 
@@ -175,6 +189,7 @@ export function rollup(commits: ScoredCommit[], releases: AttributedRelease[]): 
   };
 
   for (const commit of commits) {
+    if (commit.toolOnly) continue;
     const person = personOf(commit.personId, commit.displayName, commit.unmapped);
     person.commits += 1;
     person.rawAdditions += commit.rawAdditions;

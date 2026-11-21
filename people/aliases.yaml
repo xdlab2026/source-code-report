@@ -1,20 +1,46 @@
 # Maps emails, GitHub logins, and GitLab usernames onto one person.
-# Matching is case-insensitive. An author who matches none of these is kept
-# as a distinct identity with unmapped: true. They are not dropped.
+# Matching is exact and case-insensitive: email, then GitHub login, then
+# GitLab username. Nothing is merged by a similar name.
 #
-# Add a person by appending an entry. Use the same id for every login that
-# person uses, or the per-person report will split them.
+# A new identity is printed as a ready-to-paste snippet in the PDF Identity
+# mapping section and in the Actions log. Paste it here, then set id and
+# display_name to the real person. Use one id for every email and login
+# that person uses.
 #
-# GitLab username for Xiaodong is intentionally empty: it was not verified
-# when this file was created (no GitLab token in the environment). Add it
-# under gitlab_usernames once you know it. The GitHub login is the owner of
-# xdlab2026/source-code-report. The email is GitHub's private noreply form
-# for that account (id 262348385). Add any other commit emails you see.
+# Tool authors (Claude, Cursor, Copilot, AppBuilder Bot) are not listed.
+# A tool commit is credited to a human Co-authored-by trailer, or else to
+# the pull request or merge request author. With neither, it stays in the
+# Identity mapping section. AppBuilder Bot is left unmapped on purpose.
+#
+# Watson X machine emails below are Xiaodong's. A new Watson X email that
+# is not listed stays unmapped.
 people:
   - id: xiaodong-zhou
     display_name: Xiaodong Zhou
     emails:
       - 262348385+xdlab2026@users.noreply.github.com
+      - xiaodong@xdlab.ai
+      - xiaodong.zhou@presight.ai
+      - watsonx@localhost
+      - watsonx@watsons-mac-studio-3.local
     github_logins:
       - xdlab2026
+      - xiaodong-zhou
     gitlab_usernames: []
+
+  - id: taolu
+    display_name: taolu
+    emails:
+      - treklife@126.com
+      - tao.l@xdlab.ai
+    github_logins:
+      - taolu-ai
+    gitlab_usernames: []
+
+  - id: sharon
+    display_name: Sharon
+    emails:
+      - sharon@sharons-macbook-pro.local
+    github_logins: []
+    gitlab_usernames:
+      - Sharon-L

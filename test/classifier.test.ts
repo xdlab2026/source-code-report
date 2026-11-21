@@ -28,6 +28,8 @@ const unit: ChangeUnit = {
   personId: "xiaodong-zhou",
   displayName: "Xiaodong Zhou",
   unmapped: false,
+  toolOnly: false,
+  authors: [],
   commits: ["abc"],
   files: [],
   meaningfulLines: 12,

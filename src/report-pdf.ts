@@ -28,22 +28,24 @@ export function findChrome(): string | undefined {
 }
 
 export function personEffort(report: Report, personId: string): EffortSlice[] {
+  const parts = report.changeUnits.flatMap(creditedParts).filter((part) => part.personId === personId);
   return slices(
-    report.changeUnits.filter((unit) => unit.personId === personId),
-    (unit) => unit.projectId,
-    (unit) => ({ id: unit.projectId, name: unit.projectName }),
+    parts,
+    (part) => part.projectId,
+    (part) => ({ id: part.projectId, name: part.projectName }),
+    (part) => part,
   );
 }
 
 export function projectContributors(report: Report, projectId: string): Array<EffortSlice & { personId: string; displayName: string }> {
-  const units = report.changeUnits.filter((unit) => unit.projectId === projectId);
+  const parts = report.changeUnits.filter((unit) => unit.projectId === projectId).flatMap(creditedParts);
   const byPerson = new Map<string, { name: string; commits: number; meaningfulLines: number; rawLines: number }>();
-  for (const unit of units) {
-    const current = byPerson.get(unit.personId) ?? { name: unit.displayName, commits: 0, meaningfulLines: 0, rawLines: 0 };
-    current.commits += unit.commits.length;
-    current.meaningfulLines += unit.meaningfulLines;
-    current.rawLines += unit.rawLines;
-    byPerson.set(unit.personId, current);
+  for (const part of parts) {
+    const current = byPerson.get(part.personId) ?? { name: part.displayName, commits: 0, meaningfulLines: 0, rawLines: 0 };
+    current.commits += part.commits;
+    current.meaningfulLines += part.meaningfulLines;
+    current.rawLines += part.rawLines;
+    byPerson.set(part.personId, current);
   }
   const totalLines = [...byPerson.values()].reduce((sum, row) => sum + row.meaningfulLines, 0);
   const totalCommits = [...byPerson.values()].reduce((sum, row) => sum + row.commits, 0);
@@ -129,6 +131,15 @@ export function renderReportHtml(report: Report): string {
   .kind { color: #1F3864; font-weight: 700; }
   a { color: #0563C1; text-decoration: none; }
   h3, table.nums { break-inside: avoid; page-break-inside: avoid; }
+  pre.snippet {
+    font-family: "Liberation Mono", Consolas, monospace;
+    font-size: 8.5pt;
+    background: #F5F5F5;
+    border: 0.6pt solid #8EA9DB;
+    padding: 2mm 3mm;
+    white-space: pre-wrap;
+    margin: 0 0 3mm;
+  }
 </style>
 </head>
 <body>
@@ -158,6 +169,7 @@ export function renderReportHtml(report: Report): string {
   ${report.projects.length === 0 ? "<p>No project activity in this window.</p>" : report.projects.map(renderProject).join("")}
   <h2 class="section">3. People</h2>
   ${report.people.length === 0 ? "<p>No people with activity in this window.</p>" : report.people.map((person) => renderPerson(report, person)).join("")}
+  ${renderIdentity(report)}
 </td></tr></tbody>
 </table>
 </body>
@@ -166,7 +178,7 @@ export function renderReportHtml(report: Report): string {
   function renderProject(project: ProjectRow): string {
     const contributors = projectContributors(report, project.projectId);
     const activities = report.changeUnits
-      .filter((unit) => unit.projectId === project.projectId)
+      .filter((unit) => unit.projectId === project.projectId && !unit.toolOnly)
       .sort((left, right) => left.title.localeCompare(right.title));
     const contributorRows =
       contributors.length === 0
@@ -250,15 +262,53 @@ function highlights(report: Report): string {
   return `${projectSentence}${peopleSentence}`.trim();
 }
 
-function slices(
-  units: ClassifiedUnit[],
-  keyOf: (unit: ClassifiedUnit) => string,
-  labelOf: (unit: ClassifiedUnit) => { id: string; name: string },
+interface CreditedPart {
+  personId: string;
+  displayName: string;
+  projectId: string;
+  projectName: string;
+  commits: number;
+  meaningfulLines: number;
+  rawLines: number;
+}
+
+function creditedParts(unit: ClassifiedUnit): CreditedPart[] {
+  if (unit.toolOnly) return [];
+  if (unit.authors && unit.authors.length > 0) {
+    return unit.authors.map((author) => ({
+      personId: author.personId,
+      displayName: author.displayName,
+      projectId: unit.projectId,
+      projectName: unit.projectName,
+      commits: author.commits,
+      meaningfulLines: author.meaningfulLines,
+      rawLines: author.rawLines,
+    }));
+  }
+  return [
+    {
+      personId: unit.personId,
+      displayName: unit.displayName,
+      projectId: unit.projectId,
+      projectName: unit.projectName,
+      commits: unit.commits.length,
+      meaningfulLines: unit.meaningfulLines,
+      rawLines: unit.rawLines,
+    },
+  ];
+}
+
+function slices<T>(
+  items: T[],
+  keyOf: (item: T) => string,
+  labelOf: (item: T) => { id: string; name: string },
+  measure: (item: T) => { commits: number; meaningfulLines: number; rawLines: number },
 ): EffortSlice[] {
   const grouped = new Map<string, EffortSlice>();
-  for (const unit of units) {
-    const key = keyOf(unit);
-    const label = labelOf(unit);
+  for (const item of items) {
+    const key = keyOf(item);
+    const label = labelOf(item);
+    const measured = measure(item);
     const current = grouped.get(key) ?? {
       projectId: label.id,
       projectName: label.name,
@@ -267,9 +317,9 @@ function slices(
       rawLines: 0,
       share: 0,
     };
-    current.commits += unit.commits.length;
-    current.meaningfulLines += unit.meaningfulLines;
-    current.rawLines += unit.rawLines;
+    current.commits += measured.commits;
+    current.meaningfulLines += measured.meaningfulLines;
+    current.rawLines += measured.rawLines;
     grouped.set(key, current);
   }
   const rows = [...grouped.values()];
@@ -312,6 +362,46 @@ function formatShare(share: number): string {
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-GB").format(value);
+}
+
+function renderIdentity(report: Report): string {
+  const mapping = report.identityMapping;
+  const applied =
+    mapping.applied.length === 0
+      ? "<p>No aliases were applied in this window.</p>"
+      : mapping.applied
+          .map((group) => {
+            const rows = group.rows
+              .map(
+                (row) =>
+                  `<tr><td>${escapeHtml(row.seen)}</td><td>${escapeHtml(group.displayName)}</td><td>${escapeHtml(row.via)}</td><td>${row.commits}</td></tr>`,
+              )
+              .join("");
+            return `<h3>${escapeHtml(group.displayName)}</h3>
+<table class="nums">
+  <thead><tr><th>Seen as</th><th>Mapped to</th><th>How</th><th>Commits</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>`;
+          })
+          .join("");
+  const unmapped =
+    mapping.unmapped.length === 0
+      ? "<p>No new identities.</p>"
+      : mapping.unmapped
+          .map((entry) => {
+            const where = entry.projects.length > 0 ? ` on ${entry.projects.join(", ")}` : "";
+            const credit = entry.tool ? "Not credited to a person." : "Not in aliases.yaml.";
+            return `<p><strong>${escapeHtml(entry.displayName)}</strong> — ${entry.commits} commit${entry.commits === 1 ? "" : "s"}${escapeHtml(where)}. ${credit}</p>
+<pre class="snippet">${escapeHtml(entry.snippet)}</pre>`;
+          })
+          .join("");
+  return `<h2 class="section">4. Identity mapping</h2>
+<p>Each alias that matched in this window is listed under the person it was mapped to. A new identity is a snippet you can paste into people/aliases.yaml. Set id and display_name to the real person. Matching is exact: email, then GitHub login, then GitLab username.</p>
+<h3>Aliases applied</h3>
+${applied}
+<h3>New identities</h3>
+<p>Tool authors such as Claude and AppBuilder Bot are credited to a human Co-authored-by trailer, or else to the pull request or merge request author. The line under each tool says where its commits went.</p>
+${unmapped}`;
 }
 
 function escapeHtml(value: string): string {

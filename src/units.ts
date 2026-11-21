@@ -1,7 +1,15 @@
-import { resolveIdentity, type Person } from "./identity.js";
 import type { ScoredCommit } from "./metrics.js";
 import type { FileChange } from "./model.js";
 import type { DenyMatch } from "./noise.js";
+
+export interface UnitAuthor {
+  personId: string;
+  displayName: string;
+  unmapped: boolean;
+  commits: number;
+  meaningfulLines: number;
+  rawLines: number;
+}
 
 export interface ChangeUnit {
   id: string;
@@ -15,6 +23,8 @@ export interface ChangeUnit {
   personId: string;
   displayName: string;
   unmapped: boolean;
+  toolOnly: boolean;
+  authors: UnitAuthor[];
   commits: string[];
   files: FileChange[];
   meaningfulLines: number;
@@ -22,11 +32,7 @@ export interface ChangeUnit {
   diff: string;
 }
 
-export function buildChangeUnits(
-  commits: ScoredCommit[],
-  people: Person[],
-  deny: (filePath: string) => DenyMatch,
-): ChangeUnit[] {
+export function buildChangeUnits(commits: ScoredCommit[], deny: (filePath: string) => DenyMatch): ChangeUnit[] {
   const groups = new Map<string, ScoredCommit[]>();
   for (const commit of commits) {
     const key = groupKey(commit);
@@ -40,7 +46,8 @@ export function buildChangeUnits(
     const head = list[0];
     const pull = head.pullRequest;
     const merge = head.mergeRequest;
-    const identity = unitIdentity(list, people);
+    const identity = unitIdentity(list);
+    const authors = unitAuthors(list);
     const files = list.flatMap((commit) => commit.files);
     const diff = files
       .filter((file) => !deny(file.path).denied && file.patch)
@@ -67,6 +74,8 @@ export function buildChangeUnits(
       personId: identity.personId,
       displayName: identity.displayName,
       unmapped: identity.unmapped,
+      toolOnly: list.every((commit) => commit.toolOnly),
+      authors,
       commits: list.map((commit) => commit.sha),
       files,
       meaningfulLines: list.reduce((sum, commit) => sum + commit.meaningfulLines, 0),
@@ -83,17 +92,7 @@ function groupKey(commit: ScoredCommit): string {
   return `${commit.projectId}:commit:${commit.sha}`;
 }
 
-function unitIdentity(list: ScoredCommit[], people: Person[]) {
-  const head = list[0];
-  if (head.pullRequest?.authorLogin) {
-    return resolveIdentity(people, { githubLogin: head.pullRequest.authorLogin, name: head.pullRequest.authorLogin });
-  }
-  if (head.mergeRequest?.authorUsername) {
-    return resolveIdentity(people, {
-      gitlabUsername: head.mergeRequest.authorUsername,
-      name: head.mergeRequest.authorUsername,
-    });
-  }
+function unitIdentity(list: ScoredCommit[]): ScoredCommit {
   const counts = new Map<string, { count: number; commit: ScoredCommit }>();
   for (const commit of list) {
     const current = counts.get(commit.personId) ?? { count: 0, commit };
@@ -103,5 +102,27 @@ function unitIdentity(list: ScoredCommit[], people: Person[]) {
   const winner = [...counts.values()].sort(
     (left, right) => right.count - left.count || left.commit.personId.localeCompare(right.commit.personId),
   )[0];
-  return { personId: winner.commit.personId, displayName: winner.commit.displayName, unmapped: winner.commit.unmapped };
+  return winner.commit;
+}
+
+function unitAuthors(list: ScoredCommit[]): UnitAuthor[] {
+  const byId = new Map<string, UnitAuthor>();
+  for (const commit of list) {
+    if (commit.toolOnly) continue;
+    const current = byId.get(commit.personId) ?? {
+      personId: commit.personId,
+      displayName: commit.displayName,
+      unmapped: commit.unmapped,
+      commits: 0,
+      meaningfulLines: 0,
+      rawLines: 0,
+    };
+    current.commits += 1;
+    current.meaningfulLines += commit.meaningfulLines;
+    current.rawLines += commit.rawLines;
+    byId.set(commit.personId, current);
+  }
+  return [...byId.values()].sort(
+    (left, right) => left.displayName.localeCompare(right.displayName, "en", { sensitivity: "base" }) || left.personId.localeCompare(right.personId),
+  );
 }

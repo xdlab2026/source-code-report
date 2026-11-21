@@ -17,7 +17,7 @@ import { assertWithinBudget, createCostTracker, type CostSnapshot, type CostTrac
 import { renderCsv } from "./csv.js";
 import type { HttpClient } from "./http.js";
 import { createFetchClient } from "./http.js";
-import { loadAliases } from "./identity.js";
+import { formatIdentityLog, identityMapping, loadAliases } from "./identity.js";
 import { acquireRunLock } from "./lock.js";
 import { attributeReleases, rollup, scoreCommits } from "./metrics.js";
 import { writeNarrative } from "./narrative.js";
@@ -58,6 +58,7 @@ export interface RunLog {
   duplicate: boolean;
   counts?: { githubCommits: number; gitlabCommits: number; releases: number; changeUnits: number };
   notes: string[];
+  identityMapping?: string;
   error?: string;
 }
 
@@ -144,6 +145,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
     bucket: !options.since && !options.until,
   });
   const release = acquireRunLock(stateDir, runKey);
+  let identityText = "";
   try {
     if (options.deliver && !options.force && hasReceipt(stateDir, runKey)) {
       return {
@@ -221,9 +223,12 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
     const aliases = loadAliases(resolveFromRoot(root, config.paths.aliases));
     const deny = compileDenyList(loadDenyList(resolveFromRoot(root, config.paths.deny_list)));
     const scored = scoreCommits([...githubCommits, ...gitlab.commits], aliases, deny);
+    const mapping = identityMapping(scored);
+    identityText = formatIdentityLog(mapping);
+    process.stderr.write(`${identityText}\n`);
     const releases = attributeReleases(gitlab.releases, aliases);
     const activity = rollup(scored, releases);
-    const units = buildChangeUnits(scored, aliases, deny);
+    const units = buildChangeUnits(scored, deny);
     const classifyPrompt = readPrompt(resolveFromRoot(root, config.paths.classify_prompt));
     const system = `${classifyPrompt}\n\nJSON schema:\n${JSON.stringify(loadClassificationSchemaDocument())}`;
     const client = createAnthropicClient(http, apiKey);
@@ -247,6 +252,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
       units: classified,
       llm: cost,
       notes,
+      identityMapping: mapping,
     });
     const narrative = await writeNarrative(draft, client, {
       system: readPrompt(resolveFromRoot(root, config.paths.narrative_prompt)),
@@ -284,6 +290,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
               releases: releases.length,
               changeUnits: classified.length,
             },
+            identityMapping: identityText,
             llm: { ...cost },
           }),
         };
@@ -308,6 +315,7 @@ export async function runReport(options: RunOptions = {}): Promise<RunResult> {
         window: windowLog(timeWindow),
         destination,
         counts,
+        identityMapping: identityText,
         llm: { ...cost },
       }),
     };

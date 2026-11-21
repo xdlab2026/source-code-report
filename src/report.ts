@@ -1,5 +1,6 @@
 import { CATEGORIES, type ClassifiedUnit, type Classification } from "./classifier.js";
 import type { CostSnapshot } from "./cost.js";
+import { emptyIdentityMapping, formatIdentityLog, type IdentityMapping } from "./identity.js";
 import type { PersonActivity, ProjectActivity } from "./metrics.js";
 import { formatInTimeZone, type TimeWindow } from "./window.js";
 
@@ -48,6 +49,7 @@ export interface Report {
   changeUnits: ClassifiedUnit[];
   llm: CostSnapshot;
   notes: string[];
+  identityMapping: IdentityMapping;
   markdown: string;
 }
 
@@ -83,6 +85,7 @@ export function buildReport(input: {
   units: ClassifiedUnit[];
   llm: CostSnapshot;
   notes?: string[];
+  identityMapping?: IdentityMapping;
 }): Report {
   const people = buildPeople(input.people, input.units);
   const projects = buildProjects(input.projects, input.units);
@@ -103,6 +106,7 @@ export function buildReport(input: {
     changeUnits: input.units,
     llm: input.llm,
     notes: input.notes ?? [],
+    identityMapping: input.identityMapping ?? emptyIdentityMapping(),
     markdown: "",
   };
   report.markdown = renderMarkdown(report);
@@ -115,6 +119,7 @@ function buildPeople(activity: PersonActivity[], units: ClassifiedUnit[]): Perso
     byId.set(person.personId, { ...person, projects: [...person.projects], releases: [...person.releases], categoryMix: emptyMix(), highComplexity: 0 });
   }
   for (const unit of units) {
+    if (unit.toolOnly) continue;
     const row = byId.get(unit.personId) ?? {
       personId: unit.personId,
       displayName: unit.displayName,
@@ -153,6 +158,7 @@ function buildProjects(activity: ProjectActivity[], units: ClassifiedUnit[]): Pr
     });
   }
   for (const unit of units) {
+    if (unit.toolOnly) continue;
     const row = byId.get(unit.projectId);
     if (!row) continue;
     addMix(row.categoryMix, unit.classification);
@@ -241,6 +247,10 @@ export function renderMarkdown(report: Report): string {
     }
     lines.push("");
   }
+  lines.push("## Identity mapping");
+  lines.push("");
+  lines.push(formatIdentityLog(report.identityMapping));
+  lines.push("");
   return lines.join("\n");
 }
 
