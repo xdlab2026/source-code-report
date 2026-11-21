@@ -156,7 +156,7 @@ The Slack message is a short summary: the window, the narrative, one line of cou
 
 The job is a GitHub Actions workflow in this repo: [`.github/workflows/daily-report.yml`](.github/workflows/daily-report.yml). The file name is unchanged. The Actions title is **Weekly engineering report**.
 
-- Cron `0 6 * * 1` UTC, Monday. That is **07:00 Europe/Malta in winter (CET)** and **08:00 in summer (CEST)**. Both times are still Monday in Europe/Malta. Actions cron does not follow daylight saving time, so summer runs an hour later.
+- Cron `0 0 * * 1` UTC, Monday. That is **04:00 Asia/Dubai** (UTC+4, no daylight saving). In Europe/Malta it is 01:00 Monday in winter and 02:00 Monday in summer, so the weekly gate still opens.
 - `report.cadence` is `weekly`, so a scheduled tick posts only on `report.weekly_weekday` (Monday) in Europe/Malta. `report.window` is `7d`.
 - **Run workflow** in the Actions tab. The default window is `7d`. `24h` is still an option. A manual run does not wait for Monday.
 - A concurrency group stops two hosted runs from overlapping. A second run for the same window sees the Slack `report-key` (last 100 messages) or `state/delivered.json` and does not post again. The workflow restores `state/` from the Actions cache as a backup. On a fresh runner the Slack history is the source of truth, which is why `im:history` and `channels:history` are required.

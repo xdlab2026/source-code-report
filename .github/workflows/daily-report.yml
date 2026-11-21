@@ -2,10 +2,10 @@ name: Weekly engineering report
 
 on:
   schedule:
-    # Monday 06:00 UTC. That is 07:00 in Europe/Malta during CET (winter, UTC+1)
-    # and 08:00 during CEST (summer, UTC+2). GitHub cron cannot follow DST.
-    # Both times are still Monday in Europe/Malta, so the weekly gate stays open.
-    - cron: "0 6 * * 1"
+    # Monday 00:00 UTC. That is 04:00 in Asia/Dubai (UTC+4, no daylight saving).
+    # In Europe/Malta this is 01:00 Monday in winter and 02:00 Monday in summer,
+    # so the weekly weekday gate still opens.
+    - cron: "0 0 * * 1"
   workflow_dispatch:
     inputs:
       window:
