@@ -2,15 +2,21 @@
 # Matching is exact and case-insensitive: email, then GitHub login, then
 # GitLab username. Nothing is merged by a similar name.
 #
+# GitLab commits carry only the author email, not the GitLab username, so a
+# GitLab contributor must be listed by email to be matched on commits.
+#
 # A new identity is printed as a ready-to-paste snippet in the PDF Identity
 # mapping section and in the Actions log. Paste it here, then set id and
 # display_name to the real person. Use one id for every email and login
 # that person uses.
 #
-# Tool authors (Claude, Cursor, Copilot, AppBuilder Bot) are not listed.
-# A tool commit is credited to a human Co-authored-by trailer, or else to
-# the pull request or merge request author. With neither, it stays in the
-# Identity mapping section. AppBuilder Bot is left unmapped on purpose.
+# Tool authors (Claude, Cursor, Copilot, AppBuilder Bot, Tessera Build Bot)
+# are not listed. A tool commit is credited to a human Co-authored-by trailer,
+# or else to the pull request or merge request author. With neither, it stays
+# in the Identity mapping section.
+#
+# CI/CD system accounts (Vista CI, ci@vistajet.io) are not listed either:
+# their commits are dropped before scoring (src/collectors/shared.ts).
 #
 # Watson X machine emails below are Xiaodong's. A new Watson X email that
 # is not listed stays unmapped.
@@ -21,6 +27,7 @@ people:
       - 262348385+xdlab2026@users.noreply.github.com
       - xiaodong@xdlab.ai
       - xiaodong.zhou@presight.ai
+      - xiaodong.zhou@vistaglobal.com
       - watsonx@localhost
       - watsonx@watsons-mac-studio-3.local
     github_logins:
@@ -41,6 +48,49 @@ people:
     display_name: Sharon
     emails:
       - sharon@sharons-macbook-pro.local
+      - sharon.li@vistaglobal.com
     github_logins: []
     gitlab_usernames:
       - Sharon-L
+
+  - id: haitao-du
+    display_name: Haitao Du
+    emails:
+      - haitao.du@xdlab.ai
+    github_logins: []
+    gitlab_usernames: []
+
+  - id: bakai-choroev
+    display_name: Bakai Choroev
+    emails:
+      - bakai.choroev@vistaglobal.com
+    github_logins: []
+    gitlab_usernames: []
+
+  - id: diego-rodrigues
+    display_name: Diego Rodrigues
+    emails:
+      - diego.rodrigues@vistaglobal.com
+    github_logins: []
+    gitlab_usernames: []
+
+  - id: george-kozlitin
+    display_name: George Kozlitin
+    emails:
+      - heorhii.kozlitin@vistaglobal.com
+    github_logins: []
+    gitlab_usernames: []
+
+  - id: pavel-hardzeyeu
+    display_name: Pavel Hardzeyeu
+    emails:
+      - pavel.hardzeyeu@vistaglobal.com
+    github_logins: []
+    gitlab_usernames: []
+
+  - id: sergey-nesterov
+    display_name: Sergey Nesterov
+    emails:
+      - sergey.nesterov@vistajet.com
+    github_logins: []
+    gitlab_usernames: []

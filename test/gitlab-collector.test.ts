@@ -55,6 +55,7 @@ describe("GitLab collector", () => {
           glCommit({ id: "same", message: "feat: shared", email: "ada@example.com", name: "Ada" }),
           glCommit({ id: "merge1", message: "Merge branch 'x' into 'main'", email: "ada@example.com", name: "Ada", parents: ["a", "b"] }),
           glCommit({ id: "bot1", message: "bump lock", email: "dependabot@example.com", name: "dependabot" }),
+          glCommit({ id: "ci1", message: "deploy develop to qa", email: "ci@vistajet.io", name: "Vista CI" }),
         ]);
       }
       if (parsed.pathname.includes("/commits/") && parsed.pathname.endsWith("/merge_requests")) {

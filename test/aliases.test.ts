@@ -48,6 +48,22 @@ describe("aliases", () => {
     expect(resolveIdentity(people, { gitlabUsername: "Sharon-L", email: "other@example.com" }).personId).toBe("sharon");
   });
 
+  it("maps the Vista GitLab emails found in the 2026-11-23 report", () => {
+    expect(resolveIdentity(people, { email: "xiaodong.zhou@vistaglobal.com", name: "Xiaodong Zhou" }).personId).toBe("xiaodong-zhou");
+    expect(resolveIdentity(people, { email: "sharon.li@vistaglobal.com", name: "Sharon L" }).personId).toBe("sharon");
+    const expected: Record<string, string> = {
+      "haitao.du@xdlab.ai": "haitao-du",
+      "bakai.choroev@vistaglobal.com": "bakai-choroev",
+      "diego.rodrigues@vistaglobal.com": "diego-rodrigues",
+      "heorhii.kozlitin@vistaglobal.com": "george-kozlitin",
+      "pavel.hardzeyeu@vistaglobal.com": "pavel-hardzeyeu",
+      "sergey.nesterov@vistajet.com": "sergey-nesterov",
+    };
+    for (const [email, id] of Object.entries(expected)) {
+      expect(resolveIdentity(people, { email }).personId).toBe(id);
+    }
+  });
+
   it("keeps an unknown author as a distinct flagged identity keyed by email", () => {
     const resolved = resolveIdentity(people, { email: "nobody@example.com", githubLogin: "nobody", name: "Nobody" });
     expect(resolved.unmapped).toBe(true);
@@ -179,6 +195,20 @@ describe("aliases", () => {
     expect(log).toContain("Not credited to a person.");
     expect(log).toContain("  - id: appbuilder-bot");
     expect(log).toContain("      - bot@xdlab.ai");
+  });
+
+  it("drops Vista CI system commits from scoring entirely", () => {
+    const scored = scoreCommits(
+      [
+        commit({ sha: "ci-email", authorName: "Deploy", authorEmail: "CI@vistajet.io", githubLogin: null }),
+        commit({ sha: "ci-name", authorName: "Vista CI", authorEmail: "other@vistajet.io", githubLogin: null }),
+        commit({ sha: "ci-login", authorName: "x", authorEmail: "x@example.com", githubLogin: "vista-ci" }),
+        commit({ sha: "human", authorName: "Vista Cicero", authorEmail: "cicero@vistajet.io", githubLogin: null }),
+      ],
+      people,
+      deny,
+    );
+    expect(scored.map((entry) => entry.sha)).toEqual(["human"]);
   });
 
   it("keeps the commit author when the pull request was opened by someone else", () => {
